@@ -38,9 +38,7 @@ def calculate_mean_and_sd(values_list):
 def get_z(value, mean, sd):
 	return (float(value) - mean) / sd
 
-def get_p_from_z(z_l, tail = 'right'):
-	if tail == 'right':
-		z_l = [z * -1 for z in z_l]
+def get_p_from_z(z_l):
 	p_l = scipy.stats.norm.sf(z_l)
 	return p_l
 
