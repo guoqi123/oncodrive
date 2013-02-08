@@ -62,7 +62,7 @@ def create_output_file(options, non_syn_accum_mut_pos_dict, non_syn_cluster_coor
 	#Output file
 	f_out_fp = output_fp + '.scoreCorrection' + str(cluster_score_correction) + '.minMuts' + str(min_gene_mutations) + '.GENE.LEVEL.muts_clustering.txt'
 	f_out = open(f_out_fp, 'w')
-	f_out.write('\t'.join(['gene', 'cgc', 'gene_len', 'gene_muts', 'n_clusters', 'muts_in_clusters', 'gene_additive_cluster_score','gene_z_value', 'p_value', 'q_value' ]))
+	f_out.write('\t'.join(['Gene', 'CGC', 'Gene_len', 'Gene_Muts', 'n_clusters', 'Muts_in_clusters', 'Gene_cluster_score','Z_value', 'P_value', 'Q_value' ]))
 
 	m_out = []
 	m_not_included_out = []
@@ -405,9 +405,10 @@ if __name__ == "__main__":
 	cluster_score_correction = 1.4142
 	
 	#path to the cds fp (used for annotation purposes)
-	working_folder = os.path.dirname(sys.argv[0])
-	cds_fp = os.path.join(working_folder, 'ensembl_bio.jan2013.transcript.of.max.leng.txt')
-	cancer_census_fp = os.path.join(working_folder,'cgc.with.phenotype.txt')
+	working_folder = os.path.dirname(os.path.realpath(__file__))
+	print working_folder
+	cds_fp = os.path.join(os.path.dirname(working_folder), 'data', 'max_len_transcript.tsv')
+	cancer_census_fp = os.path.join(os.path.dirname(working_folder), 'data','CGC_phenotype.tsv')
 
 	options = parse_options()
 
