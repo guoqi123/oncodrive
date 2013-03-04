@@ -77,7 +77,10 @@ class OncoClustCommand(Command):
 	
 		parser.add_argument("-m", "--muts", dest="min_gene_mutations", type=int, default=5, metavar="INT",
 				help="Minimum number of mutations of a gene to be included in the analysis ('5' by default)")
-	
+
+		parser.add_argument("-c", "--coord", dest="print_coord", action = "store_true",
+		                    help="Use this argument for printing cluster coordinates in the output file")
+
 		parser.add_argument("-o", "--out", dest="output_fp", metavar="PATH",
 				help="Define the output file path")
 	
@@ -100,22 +103,24 @@ class OncoClustCommand(Command):
 						   syn_gene_cluster_scores_dict, non_syn_gene_cluster_scores_dict,
 						   non_syn_cluster_muts_dict, non_syn_gene_cluster_scores_external_z_dict):
 
-		#Output file
 		f_out_fp = "".join([self.args.output_fp,
-							 '.scoreCorrection' + str(OncoClustAnalysis.CLUSTER_SCORE_CORRECTION),
-							 '.minMuts' + str(self.args.min_gene_mutations),
-							 '.GENE.LEVEL.muts_clustering.txt'])
+							 '_minMuts' + str(self.args.min_gene_mutations),
+							 '_OncoCLUST.txt'])
 
 		self.log.debug("> {0}".format(f_out_fp))
 
+		h_s = ['Gene', 'CGC', 'Gene_len', 'Gene_Muts', 'n_clusters', 'Muts_in_clusters', 'Gene_score','Z_value', 'P_value', 'Q_value']
+		if self.args.print_coord:
+			h_s.insert(5, 'Cluster_coordinates')
+
 		f_out = open(f_out_fp, 'w')
-		f_out.write('\t'.join(['Gene', 'CGC', 'Gene_len', 'Gene_Muts', 'n_clusters', 'Muts_in_clusters', 'Gene_cluster_score','Z_value', 'P_value', 'Q_value' ]))
+		f_out.write('\t'.join(h_s))
 
 		m_out = []
 		m_not_included_out = []
 		for gene in non_syn_gene_cluster_scores_dict:
 			cgc = cgc_dict[gene] if gene in cgc_dict else ''
-			gene_len = int(cds_dict[gene])
+			gene_len = int(cds_dict[gene])/3
 			gene_muts = sum([non_syn_accum_mut_pos_dict[gene][pos] for pos in non_syn_accum_mut_pos_dict[gene].keys()])
 			n_clusters = len(non_syn_cluster_coordinates_dict[gene].keys())
 
@@ -123,9 +128,17 @@ class OncoClustCommand(Command):
 				muts_clusters = sum(non_syn_cluster_muts_dict[gene].values())
 				gene_additive_cluster_score = non_syn_gene_cluster_scores_dict[gene]
 				z_ext = non_syn_gene_cluster_scores_external_z_dict[gene] if gene in non_syn_gene_cluster_scores_external_z_dict else 'NA'
-				m_out.append([gene, cgc, gene_len, gene_muts, n_clusters, muts_clusters, gene_additive_cluster_score, z_ext])
+				l_out = [gene, cgc, gene_len, gene_muts, n_clusters, muts_clusters, gene_additive_cluster_score, z_ext]
+				if self.args.print_coord:
+					cluster_coordinates = get_cluster_coordinates_output(gene, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict)
+					l_out.insert(5, cluster_coordinates)
+				m_out.append(l_out)
 			else:
-				m_not_included_out.append([gene, cgc, gene_len, gene_muts, 0, 0, 0, 'NA', 'NA', 'NA'])
+				l_out = [gene, cgc, gene_len, gene_muts, 'NA', 'NA', 'NA', 'NA', 'NA']
+				if self.args.print_coord:
+					l_out.insert(5, 'NA')
+				m_not_included_out.append(l_out)
+
 
 		m_out = order_matrix(m_out, -1)
 		m_out = add_fdr(m_out, -1)
@@ -134,6 +147,9 @@ class OncoClustCommand(Command):
 		for l_out in m_out:
 			f_out.write('\n' + '\t'.join(str(e) for e in l_out))
 		f_out.close()
+
+		self.log.info("Output file created: {0}".format(f_out_fp))
+
 
 	def run(self):
 		'''

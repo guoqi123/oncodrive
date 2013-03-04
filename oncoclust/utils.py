@@ -71,7 +71,7 @@ def f2dict(f_p, k_position, v_position):
 	f.close()
 	return dict
 
-def get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, sig_cutoff):
+def get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, sig_cutoff,minimum_mut_per_position_threshold):
 	'''
 	Given a len of gene and a number of gene mutations, I find the minimum number of mutations having a prob of occurring
 	in a position <= 1%
@@ -127,3 +127,14 @@ def order_matrix(matrix, position, order = 'DEC'):
 	return matrix
 
 
+###################################################3
+##
+##   Auxiliar
+###################################################3
+def get_cluster_coordinates_output(gene, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict):
+	out_l = []
+	for cluster_id in non_syn_cluster_coordinates_dict[gene]:
+		cluster_coordinates = str(non_syn_cluster_coordinates_dict[gene][cluster_id])
+		n_muts = str(non_syn_cluster_muts_dict[gene][cluster_id])
+		out_l.append(cluster_coordinates + ':' + n_muts)
+	return ','.join(out_l)

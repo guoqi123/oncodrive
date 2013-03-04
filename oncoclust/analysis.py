@@ -8,15 +8,20 @@ class OncoClustAnalysis(object):
 	INTRA_CLUSTER_MAX_DISTANCE = 5
 
 	#the (minimum) probability threshold to consider the amount of mutations of a position as significant
-	BINOMIAL_SIG_THRESHOLD_PER_POSITION = 0.01
+	#BINOMIAL_SIG_THRESHOLD_PER_POSITION = 0.01
+	NOISE_BINOM_P_THRESHOLD = 0.01
 
 	#each position is weighted by correction^d, so the more widespread is the mut distribution within the cluster, the lower is the score
 	CLUSTER_SCORE_CORRECTION = 1.4142
 
+	#the minimum mutations per position to consider that the position is meaningful
+	MIN_MUTS_PER_MEANINGF_POS = 2
+
+
 	def __init__(self):
 		self.log = logging.getLogger("oncoclust.analysis")
 
-	def get_gene_clusters(self, gene, gene_len, gene_muts, gene_accum_mut_pos_dict):
+	def get_gene_clusters(self, gene, gene_len, gene_muts, gene_accum_mut_pos_dict, cds_dict):
 		'''
 		First, it calculate the meaningful positions which are those with the minimum number of positions that
 		are expected by less than 1% of probability according to the binomial model
@@ -32,8 +37,8 @@ class OncoClustAnalysis(object):
 		#print '\nGetting gene meaningful positions..'
 
 		#call func to return the minimum number of mutations per position to be included in the cluster
-		# (note that 'self.BINOMIAL_SIG_THRESHOLD_PER_POSITION' is a global variable)
-		minimum_mut_per_position_threshold = get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, self.BINOMIAL_SIG_THRESHOLD_PER_POSITION)
+		# (note that 'self.NOISE_BINOM_P_THRESHOLD' is a global constant)
+		minimum_mut_per_position_threshold = get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, self.NOISE_BINOM_P_THRESHOLD, self.MIN_MUTS_PER_MEANINGF_POS)
 
 		#given the minimum # of muts per position to be included in a cluster, retrieve the positions
 		significant_gene_positions_l = self.get_significant_gene_positions(gene_accum_mut_pos_dict, minimum_mut_per_position_threshold)
@@ -42,12 +47,18 @@ class OncoClustAnalysis(object):
 		if not len(significant_gene_positions_l) > 0:
 			return {}
 
-		#given the significant positions, group them into clusters
-		# (applying the constraint of self.BINOMIAL_SIG_THRESHOLD_PER_POSITION, which is a global variable)
-		gene_cluster_dict = self.group_meaningful_positions(gene, significant_gene_positions_l)
+		#given the significant positions, group them
+		# (applying the constraint of NOISE_BINOM_P_THRESHOLD, which is a global variable)
+		# gene_dict = {cluster_id: [meaningful_pos_init, meaningful_pos_end]}
+		gene_meaningful_cluster_dict = self.group_meaningful_positions(gene, significant_gene_positions_l)
 
-		#print 'The cluster dict of the gene is: {0}'.format(gene_cluster_dict)
-		return gene_cluster_dict
+		#given the meaningful positions, check if there is some non meaningful position around
+		gene_extended_meaningful_cluster_dict = self.extend_meaningful_cluster(gene, gene_meaningful_cluster_dict, gene_accum_mut_pos_dict, cds_dict)
+
+		#print 'Gene {0} and cluster dict is {1}'.format(gene, gene_meaningful_cluster_dict)
+		#print 'Gene {0} and cluster extended dict is {1}'.format(gene, gene_extended_meaningful_cluster_dict)
+
+		return gene_extended_meaningful_cluster_dict
 
 	def pos_f2accumulated_pos_dict(self, mut_fp, pos_pos):
 		'''
@@ -107,7 +118,7 @@ class OncoClustAnalysis(object):
 			#         according to binomial cumulated probability; (b) the remaining 'meaningful' positions are grouped by
 			#         using with the constraint that two positios of the same cluster can not be separated by more than 'n' AAs
 			#   dict = {gene: {cluster_id: [pos_init, pos_end]}}
-			cluster_coordinates_dict[gene] = self.get_gene_clusters(gene, gene_len, gene_muts, accum_mut_pos_dict[gene])
+			cluster_coordinates_dict[gene] = self.get_gene_clusters(gene, gene_len, gene_muts, accum_mut_pos_dict[gene], cds_dict)
 
 		return cluster_coordinates_dict
 
@@ -227,18 +238,13 @@ class OncoClustAnalysis(object):
 		return significant_gene_positions_l
 
 	def group_meaningful_positions(self, gene, gene_meaningful_positions):
-		'''
-		Given several positions, I group them by applying a constraint that the maximal
-		 distance between positions in the cluster is = self.INTRA_CLUSTER_MAX_DISTANCE
-		'''
-
 		sorted_gene_meaningful_positions = sorted(gene_meaningful_positions)
 		cluster_id = 1
 		tmp_cluster_dict = {cluster_id: [sorted_gene_meaningful_positions[0]]}
 		for i in range(1, len(sorted_gene_meaningful_positions)):
 			if sorted_gene_meaningful_positions[i] <= sorted_gene_meaningful_positions[i-1] + self.INTRA_CLUSTER_MAX_DISTANCE:
 				tmp_cluster_dict[cluster_id].append(sorted_gene_meaningful_positions[i])
-			else:
+			else:	
 				cluster_id += 1
 				tmp_cluster_dict[cluster_id] = [sorted_gene_meaningful_positions[i]]
 		#dict = {cluster_id: (init_position, end_position)}
@@ -246,6 +252,53 @@ class OncoClustAnalysis(object):
 		for cluster_id in tmp_cluster_dict:
 			gene_cluster_dict[cluster_id] = [tmp_cluster_dict[cluster_id][0], tmp_cluster_dict[cluster_id][len(tmp_cluster_dict[cluster_id])-1]]
 		return gene_cluster_dict
+
+	def calculate_max_limit_cluster(self, gene, gene_meaningful_cluster_dict, cluster_id, pos, direction, cds_dict):
+			if cluster_id == 1 and direction == 'left':
+				return 0
+			if cluster_id == len(gene_meaningful_cluster_dict.keys()) and direction == 'right':
+				return int(cds_dict[gene])/3 if gene in cds_dict else pos
+			elif direction == 'left':
+				return pos - ( (pos - gene_meaningful_cluster_dict[cluster_id -1][1]) / 2)
+			elif direction == 'right':
+				return pos + ( (gene_meaningful_cluster_dict[cluster_id +1][0] - pos) / 2)
+
+	def calculate_limit_cluster(self, gene, pos, limit_pos, gene_mut_pos_l, direction):
+		if direction == 'right':
+			sorted_mut_pos = sorted(gene_mut_pos_l)
+			for mut_pos in sorted_mut_pos:
+				if mut_pos > limit_pos:
+					return pos
+				if pos < mut_pos <= pos + self.INTRA_CLUSTER_MAX_DISTANCE:
+					pos = mut_pos
+			return pos
+		elif direction == 'left':
+			reversed_mut_pos = sorted(gene_mut_pos_l, reverse = True)
+			for mut_pos in reversed_mut_pos:
+				if mut_pos < limit_pos:
+					return pos
+				if pos - self.INTRA_CLUSTER_MAX_DISTANCE <= mut_pos < pos:
+					pos = mut_pos
+			return pos
+
+	'''
+	Receive a dict with the meaningful positions already grouped ({cluster_id: [pos_init, pos_end]}) and it tries to extend
+	'''
+	def extend_meaningful_cluster(self, gene, gene_meaningful_cluster_dict, gene_accum_mut_pos_dict, cds_dict):
+		gene_extended_meaningful_cluster_dict = {}
+
+		for cluster_id in sorted(gene_meaningful_cluster_dict.keys()):
+			init, end = gene_meaningful_cluster_dict[cluster_id][0], gene_meaningful_cluster_dict[cluster_id][1]
+
+			limit_init = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster_dict, cluster_id, init, 'left', cds_dict)
+			limit_end = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster_dict, cluster_id, end, 'right', cds_dict)
+
+			init = self.calculate_limit_cluster(gene, init, limit_init, gene_accum_mut_pos_dict.keys(), 'left')
+			end = self.calculate_limit_cluster(gene, end, limit_end, gene_accum_mut_pos_dict.keys(), 'right')
+
+			gene_extended_meaningful_cluster_dict[cluster_id] = [init, end]
+
+		return gene_extended_meaningful_cluster_dict
 
 	###################################################3
 	##
