@@ -76,12 +76,12 @@ in a position <= 1%
 I assume that the probability of having n muts in a single position is like having n succceses in gene_muts trials, 
   where the prob_success is 1/gene_len
 '''
-def get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, sig_cutoff):
+def get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, sig_cutoff, minimum_mut_per_position_threshold):
 	prob_success = 1/float(gene_len)
 	num_trials = int(gene_muts)
 
 	#pbinom = robjects.r['pbinom']
-	minimum_mut_per_position_threshold = 2
+	#minimum_mut_per_position_threshold = 2
 
 	for num_success in range(2, gene_muts):
 		#binom_p = pbinom(num_success, num_trials, prob_success)[0]
