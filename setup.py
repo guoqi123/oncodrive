@@ -21,9 +21,10 @@ setup(
 	scripts = [],
 
 	install_requires = [
-		"numpy>=1.6.1",
-		"scipy>=0.11.0",
-		"statsmodels>=0.4",
+		#"numpy==1.6.1",
+		#"scipy==0.9.0",
+		#"pandas==0.10.1",
+		#"statsmodels==0.4",
 	],
 
 	package_data = {
