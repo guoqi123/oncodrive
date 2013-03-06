@@ -1,5 +1,4 @@
-OncodriveCLUST
-==============
+# OncodriveCLUST
 
 OncodriveCLUST is a method aimed to identify genes whose mutations are biased towards a large spatial clustering.
 This method is designed to exploit the feature that mutations in cancer genes, especially oncogenes,
@@ -14,8 +13,7 @@ no positive selection and may reflect the baseline clustering of somatic mutatio
 of non-random mutation processes along the genome, the assumption of homogenous mutation probabilities is likely
 an oversimplication introducing bias in the detection of meaningful events.
 
-How it works
-------------
+## How it works
 
 Detailed description is contained in the main manuscript. Briefly, the following steps are performed:
 first, protein affecting mutations of each gene across a cohort of tumors are evaluated looking for
@@ -26,8 +24,7 @@ The gene clustering score is obtained as the sum of the scores of all clusters (
 Finally, each gene clustering score is compared with the background model to obtain a significance value.
 Background model is obtained performing the same steps than above but assessing only coding silent mutations.
 
-How it performs
----------------
+## How it performs
 
 We have analysed those entries of the COSMIC database annotated as whole gene screen as well as data provided
 from 4 projects of the Cancer Genome Atlas. We demonstrated that the resulting candidate list of drivers is
@@ -39,8 +36,7 @@ the combination of methods is beneficial to identify cancer drivers. We conclude
 that may be useful to identify cancer drivers through the assessment of the mutation clustering property that
 may be complementary to other methods aimed to identify genes involved in the disease.
 
-Installation
-------------
+## Installation
 
 OncodriveCLUST depends on some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/)
 and [statsmodels](http://statsmodels.sourceforge.net/).
@@ -49,8 +45,7 @@ There are many ways to get everything ready to use OncodriveCLUST, but the most 
 [virtualenv](http://www.virtualenv.org/), so we will start explaining it. We will also cover how to install it
 the old fashion way (*system-wide*) and will cover some possible problems that may arise with dependencies installation.
 
-virtualenv
-++++++++++
+### virtualenv
 
 Virtualenv is probably what you want to use during development, and if you have shell access to your production machines,
 you will probably want to use it there, too.
@@ -99,8 +94,7 @@ Now you can just enter the following command to get OncodriveCLUST installed in 
 
 That's all.
 
-System-wide
-+++++++++++
+### System-wide
 
 May be you prefer to do the thigs more manually or you found some problem following the previous steps.
 
@@ -113,8 +107,7 @@ This should install all the required dependencies and install the tool. If there
 then you should install them manually by your own and then try again. It is recommended to use the system package management system
 (i.e. apt-get in Ubuntu or yum in fedora).
 
-Running the example
-+++++++++++++++++++
+### Running the example
 
 With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz) there is included an example.
 Download it and execute:
