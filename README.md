@@ -1,4 +1,4 @@
-# OncodriveCLUST
+# OncodriveCLUST #
 
 OncodriveCLUST is a method aimed to identify genes whose mutations are biased towards a large spatial clustering.
 This method is designed to exploit the feature that mutations in cancer genes, especially oncogenes,
@@ -13,7 +13,7 @@ no positive selection and may reflect the baseline clustering of somatic mutatio
 of non-random mutation processes along the genome, the assumption of homogenous mutation probabilities is likely
 an oversimplication introducing bias in the detection of meaningful events.
 
-## How it works
+## How it works ##
 
 Detailed description is contained in the main manuscript. Briefly, the following steps are performed:
 first, protein affecting mutations of each gene across a cohort of tumors are evaluated looking for
@@ -24,7 +24,7 @@ The gene clustering score is obtained as the sum of the scores of all clusters (
 Finally, each gene clustering score is compared with the background model to obtain a significance value.
 Background model is obtained performing the same steps than above but assessing only coding silent mutations.
 
-## How it performs
+## How it performs ##
 
 We have analysed those entries of the COSMIC database annotated as whole gene screen as well as data provided
 from 4 projects of the Cancer Genome Atlas. We demonstrated that the resulting candidate list of drivers is
@@ -36,80 +36,72 @@ the combination of methods is beneficial to identify cancer drivers. We conclude
 that may be useful to identify cancer drivers through the assessment of the mutation clustering property that
 may be complementary to other methods aimed to identify genes involved in the disease.
 
-## Installation
+## Installation ##
 
-OncodriveCLUST depends on some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/)
-and [statsmodels](http://statsmodels.sourceforge.net/).
+OncodriveCLUST depends on some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/),
+[pandas](http://pandas.pydata.org/) and [statsmodels](http://statsmodels.sourceforge.net/).
 
-There are many ways to get everything ready to use OncodriveCLUST, but the most recommended method is using
-[virtualenv](http://www.virtualenv.org/), so we will start explaining it. We will also cover how to install it
-the old fashion way (*system-wide*) and will cover some possible problems that may arise with dependencies installation.
+It is not easy to install them, specially scipy. We will give some clues on how to install them the way it works
+for us but feel free to find your way. Once they are installed it is very easy to get OncodriveCLUST ready to work.
 
-### virtualenv
-
-Virtualenv is probably what you want to use during development, and if you have shell access to your production machines,
-you will probably want to use it there, too.
-
-What problem does virtualenv solve? When working with many Python programs the chance to have conflicts
-between libraries required by different programs or the required version of Python increases.
-Virtualenv enables multiple side-by-side installations of Python, one for each project. It doesn’t actually install
-separate copies of Python, but it does provide a clever way to keep different project environments isolated.
+We recommend to use [virtualenv](http://www.virtualenv.org/). virtualenv is a tool to create isolated Python environments.
+The basic problem being addressed is one of dependencies and versions, and indirectly permissions.
+With virtualenv you can install the libraries and programs without having to be root.
 
 If you are on *Mac OS X* or *Linux*, chances are that one of the following two commands will work for you:
 
-> $ sudo easy_install virtualenv
+	$ sudo easy_install virtualenv
 
 or even better:
 
-> $ sudo pip install virtualenv
+	$ sudo pip install virtualenv
 
 One of these will probably install *virtualenv* on your system. Maybe it’s even in your package manager.
 If you use *Ubuntu*, try:
 
-> $ sudo apt-get install python-virtualenv
+	$ sudo apt-get install python-virtualenv
 
 If you are on *Windows* and don’t have the *easy_install* command, you must install it first.
-Check the *pip* and distribute on Windows section for more information about how to do that.
+Check the *pip* and *distribute* on Windows section for more information about how to do that.
 Once you have it installed, run the same commands as above, but without the sudo prefix.
 
 Once you have virtualenv installed, just fire up a shell and create your own environment.
 
-> $ virtualenv venv
+	$ virtualenv env
 
 Now, whenever you want to work on a project, you only have to activate the corresponding environment.
 On OS X and Linux, do the following:
 
-> $ source venv/bin/activate
+	$ source env/bin/activate
 
 If you are a Windows user, the following command is for you:
 
-> $ venv\scripts\activate
+	$ env\scripts\activate
 
 Either way, you should now be using your virtualenv (notice how the prompt of your shell has changed
 to show the active environment).
 
-Now you can just enter the following command to get OncodriveCLUST installed in your virtualenv:
+Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your virtualenv:
 
-> $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz
+	$ pip install -U distribute
+	$ pip install -U numpy==1.6.1
+	$ pip install -U scipy==0.9.0
+	$ pip install -U pandas==0.10.1
+	$ pip install -U statsmodels==0.4.0
 
-That's all.
+Note that it would take quite long as they need to be compiled. One problem that could arise is that scipy require
+BLAS and LAPACK or ATLAS libraries to be installed. In case they are not you have to download and compile them by yourself.
+There is an installation guide at http://www.scipy.org/Installing_SciPy
 
-### System-wide
+Then to get OncodriveCLUST installed run the following command:
 
-May be you prefer to do the thigs more manually or you found some problem following the previous steps.
+	$ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz
 
-Just download https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz and uncompress it.
-Go inside the uncompressed folder and run:
+And that's all.
 
-> $ python setup.py install
+### Running an example ###
 
-This should install all the required dependencies and install the tool. If there is any problem installing dependencies
-then you should install them manually by your own and then try again. It is recommended to use the system package management system
-(i.e. apt-get in Ubuntu or yum in fedora).
-
-### Running the example
-
-With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz) there is included an example.
+With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz) there is an example included.
 Download it and execute:
 
-> $ oncodriveclust -n examples/tcga.BRCA.nonsyn.txt -s examples/tcga.BRCA.syn.txt -o output_path -m 3
+	$ oncodriveclust -n examples/tcga.BRCA.nonsyn.txt -s examples/tcga.BRCA.syn.txt -o output_path -m 3
