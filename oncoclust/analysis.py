@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from utils import *
 
@@ -16,6 +17,13 @@ class OncoClustAnalysis(object):
 
 	#the minimum mutations per position to consider that the position is meaningful
 	MIN_MUTS_PER_MEANINGF_POS = 2
+
+	#the default background distribution that is used in case that not enough coding-silent mutations are available in the dataset
+	# under analysis (and defined by another constant).
+	# This 'external' distribution has been obtained from different cancer datasets from 26 studies across 11 tissues
+	#NOTE that this option is now not operative
+	MIN_BACKGROUND_ENTRIES = 100
+	EXTERNAL_NULL_MODEL = {'mean': 0.279, 'sd': 0.13}
 
 
 	def __init__(self):
@@ -216,7 +224,14 @@ class OncoClustAnalysis(object):
 		for gene in gene_external_scores_dict:
 			scores_l.append(gene_external_scores_dict[gene])
 
-		scores_mean, scores_sd = calculate_mean_and_sd(scores_l)
+		if len(scores_l) < self.MIN_BACKGROUND_ENTRIES:
+			print 'There is not enough coding silent entries in the dataset to construct the background model.'
+			print 'A predefined background model retreived from a merge of other cancer datasets will be used..'
+			#scores_mean, scores_sd = self.EXTERNAL_NULL_MODEL['mean'], self.EXTERNAL_NULL_MODEL['sd']
+			sys.exit('ERROR: The background model has no entries enough!!')
+
+		else:
+			scores_mean, scores_sd = calculate_mean_and_sd(scores_l)
 
 		#then, i compare each value with the overall distribution
 		for gene in gene_cluster_scores_dict:
