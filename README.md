@@ -91,7 +91,7 @@ Now you can just enter the following commands to get the OncodriveCLUST dependen
 
 Note that it would take quite long as they need to be compiled. One problem that could arise is that scipy require
 BLAS and LAPACK or ATLAS libraries to be installed. In case they are not you have to download and compile them by yourself.
-There is an installation guide at http://www.scipy.org/Installing_SciPy
+There is an installation guide at [http://www.scipy.org/Installing_SciPy](http://www.scipy.org/Installing_SciPy)
 
 Then to get OncodriveCLUST installed run the following command:
 
@@ -126,7 +126,7 @@ is assumed to be a different mutation (i.e, the mutation for a particular gene i
 cohort).
 
 With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz) there is an example included.
-We also provide with more examples in a separate compressed file at [https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust-examples.tar.gz].
+We also provide with more [examples in a separate compressed file](https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust-examples.tar.gz).
 To run the default example:
 
 	$ oncodriveclust -n examples/tcga.BRCA.nonsyn.txt -s examples/tcga.BRCA.syn.txt -o output_path -m 3
