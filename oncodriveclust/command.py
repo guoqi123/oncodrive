@@ -3,7 +3,7 @@ import argparse
 import logging
 
 from . import VERSION
-from analysis import OncoClustAnalysis
+from analysis import OncodriveClustAnalysis
 from utils import *
 
 _log_level_map = {
@@ -35,9 +35,9 @@ class Command(object):
 		else:
 			self.args.log_level = self.args.log_level.lower()
 
-		logging.getLogger("oncoclust").setLevel(_log_level_map[self.args.log_level])
+		logging.getLogger("oncodriveclust").setLevel(_log_level_map[self.args.log_level])
 
-		self.log = logging.getLogger("oncoclust")
+		self.log = logging.getLogger("oncodriveclust")
 
 	def _add_arguments(self, parser):
 		pass
@@ -51,9 +51,9 @@ class Command(object):
 
 		self._check_args()
 
-class OncoClustCommand(Command):
+class OncodriveClustCommand(Command):
 	def __init__(self):
-		Command.__init__(self, prog="oncoclust", desc="Run OncoCLUST")
+		Command.__init__(self, prog="oncodriveclust", desc="Run OncodriveCLUST analysis")
 
 		self.root_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
@@ -67,10 +67,10 @@ class OncoClustCommand(Command):
 		parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION)
 
 		parser.add_argument("-s", "--syn", dest="syn_mut_fp", metavar="PATH",
-				help="The path to the Synonimous mutations file to construct the background model")
+				help="The path to the Synonymous mutations file to construct the background model")
 
 		parser.add_argument("-n", "--nonsyn", dest="non_syn_mut_fp", metavar="PATH",
-				help="The path to the NON-Synonimous mutations file to be checked")
+				help="The path to the NON-Synonymous mutations file to be checked")
 	
 		parser.add_argument("-p", "--pos", dest="pos_pos", type=int, default=-1, metavar="INT",
 				help="AA position column index ('-1' by default)")
@@ -160,7 +160,7 @@ class OncoClustCommand(Command):
 
 		Command.run(self)
 
-		analysis = OncoClustAnalysis()
+		analysis = OncodriveClustAnalysis()
 
 		self.log.info("Loading CDS data ...")
 
@@ -187,7 +187,7 @@ def main():
 	"""
 	Main entry point
 	"""
-	OncoClustCommand().run()
+	OncodriveClustCommand().run()
 
 if __name__ == "__main__":
 	main()

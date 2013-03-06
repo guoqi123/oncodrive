@@ -3,7 +3,7 @@ import sys
 
 from utils import *
 
-class OncoClustAnalysis(object):
+class OncodriveClustAnalysis(object):
 
 	#states the max number of aminoacids between 2 positions to group them into the same cluster
 	INTRA_CLUSTER_MAX_DISTANCE = 5
@@ -27,7 +27,7 @@ class OncoClustAnalysis(object):
 
 
 	def __init__(self):
-		self.log = logging.getLogger("oncoclust.analysis")
+		self.log = logging.getLogger("oncodriveclust.analysis")
 
 	def get_gene_clusters(self, gene, gene_len, gene_muts, gene_accum_mut_pos_dict, cds_dict):
 		'''
@@ -225,11 +225,11 @@ class OncoClustAnalysis(object):
 			scores_l.append(gene_external_scores_dict[gene])
 
 		if len(scores_l) < self.MIN_BACKGROUND_ENTRIES:
-			print 'There is not enough coding silent entries in the dataset to construct the background model.'
-			print 'A predefined background model retreived from a merge of other cancer datasets will be used..'
+			self.log.warn('There is not enough coding silent entries in the dataset to construct the background model.')
+			self.log.warn('A predefined background model retreived from a merge of other cancer datasets will be used.')
 			#scores_mean, scores_sd = self.EXTERNAL_NULL_MODEL['mean'], self.EXTERNAL_NULL_MODEL['sd']
-			sys.exit('ERROR: The background model has no entries enough!!')
-
+			self.log.error('But this feature is not yet implemented. Finishing analysis')
+			exit(1)
 		else:
 			scores_mean, scores_sd = calculate_mean_and_sd(scores_l)
 
@@ -296,10 +296,11 @@ class OncoClustAnalysis(object):
 					pos = mut_pos
 			return pos
 
-	'''
-	Receive a dict with the meaningful positions already grouped ({cluster_id: [pos_init, pos_end]}) and it tries to extend
-	'''
 	def extend_meaningful_cluster(self, gene, gene_meaningful_cluster_dict, gene_accum_mut_pos_dict, cds_dict):
+		'''
+		Receive a dict with the meaningful positions already grouped ({cluster_id: [pos_init, pos_end]}) and it tries to extend
+		'''
+
 		gene_extended_meaningful_cluster_dict = {}
 
 		for cluster_id in sorted(gene_meaningful_cluster_dict.keys()):
@@ -332,7 +333,7 @@ class OncoClustAnalysis(object):
 		#dict = {gene:{cluster_id:[pos_init, pos_end]}}
 		self.log.info("Grouping the lowly expected mutations into clusters ...")
 
-		self.log.info("  Non_Synonimal mutations ...")
+		self.log.info("  Non_Synonymal mutations ...")
 		non_syn_cluster_coordinates_dict = self.cluster_mutations(non_syn_accum_mut_pos_dict, min_gene_mutations, cds_dict)
 
 		self.log.info("  Coding_silent mutations ...")
@@ -343,7 +344,7 @@ class OncoClustAnalysis(object):
 		#dict = {gene:{cluster_id: num_enclosed_muts}}
 		self.log.info("Getting the number of mutations within each cluster ...")
 
-		self.log.info("  Non_Synonimal mutations ...")
+		self.log.info("  Non_Synonymal mutations ...")
 		non_syn_cluster_muts_dict = self.get_enclosed_mutations(non_syn_cluster_coordinates_dict, non_syn_accum_mut_pos_dict)
 
 		self.log.info("  Coding_silent mutations ...")
@@ -351,9 +352,9 @@ class OncoClustAnalysis(object):
 
 		#-----> (B2) Calculate the score of each cluster: this score gives an idea of how specific are the mutation spatial concentration
 		#dict = {gene :{cluster_id: clustering_score}}
-		self.log.info("Scoring the position specficity of the clusters ...")
+		self.log.info("Scoring the position specificity of the clusters ...")
 
-		self.log.info("  Non_Synonimal mutations ...")
+		self.log.info("  Non_Synonymal mutations ...")
 		non_syn_cluster_scores_dict = self.score_clusters(non_syn_accum_mut_pos_dict, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict)
 
 		self.log.info("  Coding_silent mutations ...")
