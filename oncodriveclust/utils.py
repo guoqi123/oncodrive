@@ -1,14 +1,15 @@
 import math
-from operator import itemgetter
 
 import scipy
 
+from operator import itemgetter
+
 from statsmodels.sandbox.stats.multicomp import fdrcorrection0
 
-###################################################3
+###################################################
 ##
 ##   Statistics
-###################################################3
+###################################################
 
 def factorial(n):
 	if n < 2: return 1

@@ -3,3 +3,5 @@
 *~
 *.egg
 *.tar.gz
+build
+oncodriveclust.egg-info/
