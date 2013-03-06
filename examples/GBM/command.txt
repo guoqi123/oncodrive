@@ -1,3 +1,0 @@
-python prototype/oncoclust.py -n example/input/tgca.GBM.jan2013.txt.nodups -s example/input/multitumor.coding-silent.jan2013.txt.nodups -m 3 -o example/output/GBM.clust
-
-
