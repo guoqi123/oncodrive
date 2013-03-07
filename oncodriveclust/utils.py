@@ -132,10 +132,11 @@ def order_matrix(matrix, position, order = 'DEC'):
 ##
 ##   Auxiliar
 ###################################################3
+
 def get_cluster_coordinates_output(gene, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict):
 	out_l = []
 	for cluster_id in non_syn_cluster_coordinates_dict[gene]:
-		cluster_coordinates = str(non_syn_cluster_coordinates_dict[gene][cluster_id])
+		cluster_coordinates = "[{0}]".format(",".join([str(x) for x in non_syn_cluster_coordinates_dict[gene][cluster_id]]))
 		n_muts = str(non_syn_cluster_muts_dict[gene][cluster_id])
 		out_l.append(cluster_coordinates + ':' + n_muts)
 	return ','.join(out_l)

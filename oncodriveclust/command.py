@@ -99,16 +99,14 @@ class OncodriveClustCommand(Command):
 			exit(-1)
 
 		if not self.args.output_path:
-			self.args.output_path = os.path.join(os.getcwd(), "oncodriveclust")
+			self.args.output_path = os.path.join(os.getcwd(), "oncodriveclust-results.tsv")
 
-	def create_output_file(self, cds_dict, cgc_dict,
+	def create_output_file(self, cds_len, cgc,
 						   non_syn_accum_mut_pos_dict, non_syn_cluster_coordinates_dict,
 						   syn_gene_cluster_scores_dict, non_syn_gene_cluster_scores_dict,
 						   non_syn_cluster_muts_dict, non_syn_gene_cluster_scores_external_z_dict):
 
-		out_path = "".join([self.args.output_path,
-							 '_minMuts' + str(self.args.min_gene_mutations),
-							 '.txt'])
+		out_path = self.args.output_path
 
 		self.log.debug("> {0}".format(out_path))
 
@@ -122,8 +120,8 @@ class OncodriveClustCommand(Command):
 		m_out = []
 		m_not_included_out = []
 		for gene in non_syn_gene_cluster_scores_dict:
-			cgc = cgc_dict[gene] if gene in cgc_dict else ''
-			gene_len = int(cds_dict[gene]) / 3
+			cgc = cgc[gene] if gene in cgc else ''
+			gene_len = int(cds_len[gene]) / 3
 			gene_muts = sum([non_syn_accum_mut_pos_dict[gene][pos] for pos in non_syn_accum_mut_pos_dict[gene].keys()])
 			n_clusters = len(non_syn_cluster_coordinates_dict[gene].keys())
 
@@ -151,7 +149,7 @@ class OncodriveClustCommand(Command):
 			f_out.write('\n' + '\t'.join(str(e) for e in l_out))
 		f_out.close()
 
-		self.log.info("Output file created: {0}".format(out_path))
+		self.log.info("Output file created: {0}".format(os.path.basename(out_path)))
 
 	def load_map_from_resource(self, resource_path, key_index=0, value_index=1):
 		from pkg_resources import resource_stream

@@ -146,9 +146,8 @@ class OncodriveClustAnalysis(object):
 			for cluster_id in cluster_coordinates_dict[gene]:
 				n_mutations = 0
 				for position in accum_mut_pos_dict[gene]:
-					cluster_init, cluster_end = cluster_coordinates_dict[gene][cluster_id][0], \
-												cluster_coordinates_dict[gene][cluster_id][1]
-					if position in range(cluster_init, cluster_end +1):
+					cluster_init, cluster_end = cluster_coordinates_dict[gene][cluster_id][0:2]
+					if position in range(cluster_init, cluster_end + 1):
 						n_mutations += accum_mut_pos_dict[gene][position]
 				tmp_dict[cluster_id] = n_mutations
 			cluster_summary_dict[gene] = tmp_dict
@@ -206,7 +205,7 @@ class OncodriveClustAnalysis(object):
 				if pos in gene_accum_pos_dict:
 					muts_perc_pos = float(gene_accum_pos_dict[pos]) / gene_mutations
 					d = abs(pos - max_muts_pos)
-					score += muts_perc_pos / (self.CLUSTER_SCORE_CORRECTION **d)
+					score += muts_perc_pos / (self.CLUSTER_SCORE_CORRECTION ** d)
 			#once the cluster score is calculated, update the dict
 			gene_clustering_score_dict[cluster_id] = score
 		return gene_clustering_score_dict
@@ -227,7 +226,7 @@ class OncodriveClustAnalysis(object):
 			self.log.warn('There is not enough coding silent entries in the dataset to construct the background model.')
 			self.log.warn('A predefined background model retreived from a merge of other cancer datasets will be used.')
 			#scores_mean, scores_sd = self.EXTERNAL_NULL_MODEL['mean'], self.EXTERNAL_NULL_MODEL['sd']
-			self.log.error('But this feature is not yet implemented. Finishing analysis')
+			self.log.error('But this feature is not yet implemented. Finishing analysis.')
 			exit(1)
 		else:
 			scores_mean, scores_sd = calculate_mean_and_sd(scores_l)
@@ -271,11 +270,11 @@ class OncodriveClustAnalysis(object):
 			if cluster_id == 1 and direction == 'left':
 				return 0
 			if cluster_id == len(gene_meaningful_cluster_dict.keys()) and direction == 'right':
-				return int(cds_dict[gene])/3 if gene in cds_dict else pos
+				return int(cds_dict[gene]) / 3 if gene in cds_dict else pos
 			elif direction == 'left':
-				return pos - ( (pos - gene_meaningful_cluster_dict[cluster_id -1][1]) / 2)
+				return pos - ( (pos - gene_meaningful_cluster_dict[cluster_id - 1][1]) / 2)
 			elif direction == 'right':
-				return pos + ( (gene_meaningful_cluster_dict[cluster_id +1][0] - pos) / 2)
+				return pos + ( (gene_meaningful_cluster_dict[cluster_id + 1][0] - pos) / 2)
 
 	def calculate_limit_cluster(self, gene, pos, limit_pos, gene_mut_pos_l, direction):
 		if direction == 'right':
@@ -303,7 +302,7 @@ class OncodriveClustAnalysis(object):
 		gene_extended_meaningful_cluster_dict = {}
 
 		for cluster_id in sorted(gene_meaningful_cluster_dict.keys()):
-			init, end = gene_meaningful_cluster_dict[cluster_id][0], gene_meaningful_cluster_dict[cluster_id][1]
+			init, end = gene_meaningful_cluster_dict[cluster_id][0:2]
 
 			limit_init = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster_dict, cluster_id, init, 'left', cds_dict)
 			limit_end = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster_dict, cluster_id, end, 'right', cds_dict)
