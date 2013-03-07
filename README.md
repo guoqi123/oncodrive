@@ -41,13 +41,13 @@ may be complementary to other methods aimed to identify genes involved in the di
 OncodriveCLUST depends on some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/),
 [pandas](http://pandas.pydata.org/) and [statsmodels](http://statsmodels.sourceforge.net/).
 
-Those libraries require to compile their code during the installation so the it will take some time.
+Those libraries require to compile their code during the installation so it will take some time.
 But don't be scared, if you follow our instructions everything should be fine. Once they are installed it is very
 easy to get OncodriveCLUST ready to work.
 
-We recommend to use [virtualenv](http://www.virtualenv.org/). virtualenv is a tool to create isolated Python environments.
+We recommend to use [virtualenv](http://www.virtualenv.org/). virtualenv is a tool to create isolated *Python* environments.
 The basic problem being addressed is one of dependencies and versions, and indirectly permissions.
-With virtualenv you can install the libraries and programs without having to be root.
+With *virtualenv* you can install the libraries and programs without having to be *root*.
 
 If you are on *Mac OS X* or *Linux*, chances are that one of the following two commands will work for you:
 
@@ -63,26 +63,26 @@ If you use *Ubuntu*, try:
 	$ sudo apt-get install python-virtualenv
 
 If you are on *Windows* and don’t have the *easy_install* command, you must install it first.
-Check the *pip* and *distribute* on Windows section for more information about how to do that.
-Once you have it installed, run the same commands as above, but without the sudo prefix.
+Check the *pip* and *distribute* on *Windows* section for more information about how to do that.
+Once you have it installed, run the same commands as above, but without the *sudo* prefix.
 
-Once you have virtualenv installed, just fire up a shell and create your own environment.
+Once you have *virtualenv* installed, just fire up a shell and create your own environment.
 
 	$ virtualenv env
 
 Now, whenever you want to work on a project, you only have to activate the corresponding environment.
-On OS X and Linux, do the following:
+On *OS X* and *Linux*, do the following:
 
 	$ source env/bin/activate
 
-If you are a Windows user, the following command is for you:
+If you are a *Windows* user, the following command is for you:
 
 	$ env\scripts\activate
 
-Either way, you should now be using your virtualenv (notice how the prompt of your shell has changed
+Either way, you should now be using your *virtualenv* (notice how the prompt of your shell has changed
 to show the active environment).
 
-Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your virtualenv:
+Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your *virtualenv*:
 
 	(env) $ pip install -U distribute
 	(env) $ pip install -U numpy==1.6.1
@@ -90,8 +90,8 @@ Now you can just enter the following commands to get the OncodriveCLUST dependen
 	(env) $ pip install -U pandas==0.10.1
 	(env) $ pip install -U statsmodels==0.4.3
 
-Note that it would take quite long as they need to be compiled. One problem that could arise is that scipy require
-BLAS and LAPACK or ATLAS libraries to be installed. In case they are not you have to download and compile them by yourself.
+One problem that could arise is that scipy require *BLAS* and *LAPACK* or *ATLAS* libraries to be installed.
+In case they are not installedby default you have to download and compile them by yourself.
 There is an installation guide at [http://www.scipy.org/Installing_SciPy](http://www.scipy.org/Installing_SciPy)
 
 Then to get OncodriveCLUST installed run the following command:
@@ -134,7 +134,7 @@ OncodriveCLUST requires three input files, one must contain the protein affectin
 the other must contain the coding silent mutations that the method will use to construct the background model and the last
 one contain the CDS length for the genes transcripts.
 
-The first two files will be by default parsed as containing the gene symbol (i.e. HUGO) in the first column and the protein
+The first two files will be by default parsed as containing the gene symbol (i.e. *HUGO*) in the first column and the protein
 position in the last column. Any other column between the first and the last will be ignored. Note that each entry
 is assumed to be a different mutation (i.e, the mutation for a particular gene in a particular sample of the tumor
 cohort). The file containing CDS lengths have three columns: the gene symbol, the transcript symbol and the CDS length.
@@ -156,7 +156,7 @@ To run the default example:
 	(env) $ oncodriveclust -m 3 --cgc data/CGC_phenotype.tsv examples/tcga.BRCA.nonsyn.txt examples/tcga.BRCA.syn.txt data/gene_transcripts.tsv
 
 This will analyse the BRCA (breast invasive carcinoma) data set and the OncodriveCLUST output will be placed at
-the output_path specified with the -o argument (if not specified then the current directory will be used).
+the path specified with the -o argument (if not specified then the current directory will be used).
 Note that for the analyses of the manuscript, we have used an arbitrary value of at least 10 mutations across
 the tumor cohort to include the gene in the analysis for the COSMIC data set and a figure of 3 for the TCGA data sets
 analysis. This can be defined by using the -m argument. With the optional flag -c the coordinates of the mutation
