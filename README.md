@@ -91,17 +91,48 @@ Now you can just enter the following commands to get the OncodriveCLUST dependen
 
 Note that it would take quite long as they need to be compiled. One problem that could arise is that scipy require
 BLAS and LAPACK or ATLAS libraries to be installed. In case they are not you have to download and compile them by yourself.
-There is an installation guide at http://www.scipy.org/Installing_SciPy
+There is an installation guide at [http://www.scipy.org/Installing_SciPy](http://www.scipy.org/Installing_SciPy)
 
 Then to get OncodriveCLUST installed run the following command:
 
 	$ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz
 
-And that's all.
+And that's all. The following command will allow you to check that is correctly installed by showing the command help:
+
+	$ oncodriveclust --help
+	-h, --help              show this help message and exit
+	--version               show program's version number and exit
+	-s PATH, --syn PATH     The path to the Synonimous mutations file to construct
+	                        the background model
+	-n PATH, --nonsyn PATH
+	                        The path to the NON-Synonimous mutations file to be
+							checked
+	-p INT, --pos INT       AA position column index ('-1' by default, i.e. the last one)
+	-m INT, --muts INT      Minimum number of mutations of a gene to be included
+	                        in the analysis ('5' by default)
+	-c, --coord             Use this argument for printing cluster coordinates in
+	                        the output file
+	-o PATH, --out PATH     Define the output file path
+
+Note that -s, -n and -o are obligatory arguments
 
 ### Running an example ###
 
+OncodriveCLUST requires two input files, one must contain the protein affecting mutations of the data set under analysis,
+the other must contain the coding silent mutations that the method will use to construct the background model.
+Both of them will be by default parsed as containing the gene symbol (i.e. HUGO) in the first column and the protein
+position in the last column. Any other column between the first and the last will be ignored. Note that each entry
+is assumed to be a different mutation (i.e, the mutation for a particular gene in a particular sample of the tumor
+cohort).
+
 With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz) there is an example included.
-Download it and execute:
+We also provide with more [examples in a separate compressed file](https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust-examples.tar.gz).
+To run the default example:
 
 	$ oncodriveclust -n examples/tcga.BRCA.nonsyn.txt -s examples/tcga.BRCA.syn.txt -o output_path -m 3
+
+This will analyse the BRCA (breast invasive carcinoma) data set and the OncodriveCLUST output will be placed at
+the output_path specified with the -o argument. Note that for the analyses of the manuscript, we have used an
+arbitrary value of at least 10 mutations across the tumor cohort to include the gene in the analysis for the
+COSMIC data set and a figure of 3 for the TCGA data sets analysis. This can be defined by using the -m argument.
+With the optional flag -c the coordinates of the mutation clusters will be included in the output file.
