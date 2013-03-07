@@ -41,12 +41,13 @@ may be complementary to other methods aimed to identify genes involved in the di
 OncodriveCLUST depends on some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/),
 [pandas](http://pandas.pydata.org/) and [statsmodels](http://statsmodels.sourceforge.net/).
 
-It is not easy to install them, specially scipy. We will give some clues on how to install them the way it works
-for us but feel free to find your way. Once they are installed it is very easy to get OncodriveCLUST ready to work.
+Those libraries require to compile their code during the installation so it will take some time.
+But don't be scared, if you follow our instructions everything should be fine. Once they are installed it is very
+easy to get OncodriveCLUST ready to work.
 
-We recommend to use [virtualenv](http://www.virtualenv.org/). virtualenv is a tool to create isolated Python environments.
+We recommend to use [virtualenv](http://www.virtualenv.org/). virtualenv is a tool to create isolated *Python* environments.
 The basic problem being addressed is one of dependencies and versions, and indirectly permissions.
-With virtualenv you can install the libraries and programs without having to be root.
+With *virtualenv* you can install the libraries and programs without having to be *root*.
 
 If you are on *Mac OS X* or *Linux*, chances are that one of the following two commands will work for you:
 
@@ -62,77 +63,118 @@ If you use *Ubuntu*, try:
 	$ sudo apt-get install python-virtualenv
 
 If you are on *Windows* and don’t have the *easy_install* command, you must install it first.
-Check the *pip* and *distribute* on Windows section for more information about how to do that.
-Once you have it installed, run the same commands as above, but without the sudo prefix.
+Check the *pip* and *distribute* on *Windows* section for more information about how to do that.
+Once you have it installed, run the same commands as above, but without the *sudo* prefix.
 
-Once you have virtualenv installed, just fire up a shell and create your own environment.
+Once you have *virtualenv* installed, just fire up a shell and create your own environment.
 
 	$ virtualenv env
 
 Now, whenever you want to work on a project, you only have to activate the corresponding environment.
-On OS X and Linux, do the following:
+On *OS X* and *Linux*, do the following:
 
 	$ source env/bin/activate
 
-If you are a Windows user, the following command is for you:
+If you are a *Windows* user, the following command is for you:
 
 	$ env\scripts\activate
 
-Either way, you should now be using your virtualenv (notice how the prompt of your shell has changed
+Either way, you should now be using your *virtualenv* (notice how the prompt of your shell has changed
 to show the active environment).
 
-Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your virtualenv:
+Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your *virtualenv*:
 
-	$ pip install -U distribute
-	$ pip install -U numpy==1.6.1
-	$ pip install -U scipy==0.9.0
-	$ pip install -U pandas==0.10.1
-	$ pip install -U statsmodels==0.4.0
+	(env) $ pip install -U distribute
+	(env) $ pip install -U numpy==1.6.1
+	(env) $ pip install -U scipy==0.9.0
+	(env) $ pip install -U pandas==0.10.1
+	(env) $ pip install -U statsmodels==0.4.3
 
-Note that it would take quite long as they need to be compiled. One problem that could arise is that scipy require
-BLAS and LAPACK or ATLAS libraries to be installed. In case they are not you have to download and compile them by yourself.
+One problem that could arise is that scipy require *BLAS* and *LAPACK* or *ATLAS* libraries to be installed.
+In case they are not installedby default you have to download and compile them by yourself.
 There is an installation guide at [http://www.scipy.org/Installing_SciPy](http://www.scipy.org/Installing_SciPy)
 
 Then to get OncodriveCLUST installed run the following command:
 
-	$ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz
+	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz
 
 And that's all. The following command will allow you to check that is correctly installed by showing the command help:
 
-	$ oncodriveclust --help
-	-h, --help              show this help message and exit
-	--version               show program's version number and exit
-	-s PATH, --syn PATH     The path to the Synonimous mutations file to construct
-	                        the background model
-	-n PATH, --nonsyn PATH
-	                        The path to the NON-Synonimous mutations file to be
-							checked
-	-p INT, --pos INT       AA position column index ('-1' by default, i.e. the last one)
-	-m INT, --muts INT      Minimum number of mutations of a gene to be included
-	                        in the analysis ('5' by default)
-	-c, --coord             Use this argument for printing cluster coordinates in
-	                        the output file
-	-o PATH, --out PATH     Define the output file path
+	(env) $ oncodriveclust --help
 
-Note that -s, -n and -o are obligatory arguments
+	usage: oncodriveclust [-h] [--version] [-o PATH] [--cgc PATH] [-m INT] [-c]
+						  [-p INT]
+						  NON-SYN-PATH SYN-PATH GENE-TRANSCRIPTS
+
+	Run OncodriveCLUST analysis
+
+	positional arguments:
+	  NON-SYN-PATH         The path to the NON-Synonymous mutations file to be
+						   checked
+	  SYN-PATH             The path to the Synonymous mutations file to construct
+						   the background model
+	  GENE-TRANSCRIPTS     The path of a file containing transcripts length for
+						   genes
+
+	optional arguments:
+	  -h, --help           show this help message and exit
+	  --version            show program's version number and exit
+	  -o PATH, --out PATH  Define the output file path
+	  --cgc PATH           The path of a file containing CGC data
+	  -m INT, --muts INT   Minimum number of mutations of a gene to be included in
+						   the analysis ('5' by default)
+	  -c, --coord          Use this argument for printing cluster coordinates in
+						   the output file
+	  -p INT, --pos INT    AA position column index ('-1' by default)
+
 
 ### Running an example ###
 
-OncodriveCLUST requires two input files, one must contain the protein affecting mutations of the data set under analysis,
-the other must contain the coding silent mutations that the method will use to construct the background model.
-Both of them will be by default parsed as containing the gene symbol (i.e. HUGO) in the first column and the protein
+OncodriveCLUST requires three input files, one must contain the protein affecting mutations of the data set under analysis,
+the other must contain the coding silent mutations that the method will use to construct the background model and the last
+one contain the CDS length for the genes transcripts.
+
+The first two files will be by default parsed as containing the gene symbol (i.e. *HUGO*) in the first column and the protein
 position in the last column. Any other column between the first and the last will be ignored. Note that each entry
 is assumed to be a different mutation (i.e, the mutation for a particular gene in a particular sample of the tumor
-cohort).
+cohort). The file containing CDS lengths have three columns: the gene symbol, the transcript symbol and the CDS length.
+OncodriveCLUST will get the gene CDS length from the longest transcript automatically.
 
-With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.1.1.tar.gz) there is an example included.
+With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz) you will get some example files,
+a file containing transcripts CDS lengths and a file containing [CGC](http://www.sanger.ac.uk/genetics/CGP/Census/)
+phenotypes for known genes, so it is recommended to download and uncompress it (just click on the previous
+link, uncompress it and then change the current directory).
+
+	(env) $ curl -o oncodriveclust.tar.gz https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz
+	(env) $ tar -xvf oncodriveclust.tar.gz
+	(env) $ cd bbglab-oncodriveclust-<code>
+
 We also provide with more [examples in a separate compressed file](https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust-examples.tar.gz).
+
 To run the default example:
 
-	$ oncodriveclust -n examples/tcga.BRCA.nonsyn.txt -s examples/tcga.BRCA.syn.txt -o output_path -m 3
+	(env) $ oncodriveclust -m 3 --cgc data/CGC_phenotype.tsv examples/tcga.BRCA.nonsyn.txt examples/tcga.BRCA.syn.txt data/gene_transcripts.tsv
 
 This will analyse the BRCA (breast invasive carcinoma) data set and the OncodriveCLUST output will be placed at
-the output_path specified with the -o argument. Note that for the analyses of the manuscript, we have used an
-arbitrary value of at least 10 mutations across the tumor cohort to include the gene in the analysis for the
-COSMIC data set and a figure of 3 for the TCGA data sets analysis. This can be defined by using the -m argument.
-With the optional flag -c the coordinates of the mutation clusters will be included in the output file.
+the path specified with the -o argument (if not specified then the current directory will be used).
+Note that for the analyses of the manuscript, we have used an arbitrary value of at least 10 mutations across
+the tumor cohort to include the gene in the analysis for the COSMIC data set and a figure of 3 for the TCGA data sets
+analysis. This can be defined by using the -m argument. With the optional flag -c the coordinates of the mutation
+clusters will be included in the output file.
+
+The use of "--cgc data/CGC_phenotype.tsv" is optional, but if specified then the results will contain information about the
+CGC phenotype for each gene if available.
+
+The results file will look something like:
+
+	(env) $ head oncodriveclust_minMuts3.txt
+	Gene	CGC	Gene_len	Gene_Muts	n_clusters	Muts_in_clusters	Gene_score	Z_value	P_value	Q_value
+	KRAS	Dom	190	3	1	3	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
+	KLRG2		410	3	1	3	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
+	KRT38		457	3	1	3	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
+	AKT1	Dom	481	12	1	11	0.916666666667	3.79776654893	7.30028674072e-05	0.00187982383574
+	PIK3CA	Dom	1069	186	7	178	0.855624278036	3.52018384847	0.00021562388305	0.00444185199083
+	VASN		674	5	1	4	0.8	3.26723933475	0.000543009128935	0.00932165671338
+	KIF19		999	3	1	3	0.784521187523	3.1968513525	0.000694682523388	0.0100330867162
+	ZNF598		905	4	1	3	0.75	3.03987052868	0.00118339934876	0.0100330867162
+	FGFR2	Dom	823	4	1	3	0.75	3.03987052868	0.00118339934876	0.0100330867162

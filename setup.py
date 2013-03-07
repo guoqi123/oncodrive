@@ -27,10 +27,7 @@ setup(
 		#"statsmodels==0.4",
 	],
 
-	package_data = {
-		# If any package contains *.txt or *.pdf files, include them:
-		"" : ["*.txt", "*.md", "*.pdf", "*.html"]
-	},
+	include_package_data = True,
 
 	entry_points = {
 		'console_scripts': [
