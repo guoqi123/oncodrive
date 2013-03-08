@@ -102,52 +102,54 @@ class OncodriveClustCommand(Command):
 			self.args.output_path = os.path.join(os.getcwd(), "oncodriveclust-results.tsv")
 
 	def create_output_file(self, cds_len, cgc,
-						   non_syn_accum_mut_pos_dict, non_syn_cluster_coordinates_dict,
-						   syn_gene_cluster_scores_dict, non_syn_gene_cluster_scores_dict,
-						   non_syn_cluster_muts_dict, non_syn_gene_cluster_scores_external_z_dict):
+						   non_syn_accum_mut_pos, non_syn_cluster_coordinates,
+						   syn_gene_cluster_scores, non_syn_gene_cluster_scores,
+						   non_syn_cluster_muts, non_syn_gene_cluster_scores_external_z):
 
 		out_path = self.args.output_path
 
 		self.log.debug("> {0}".format(out_path))
 
-		h_s = ['Gene', 'CGC', 'Gene_len', 'Gene_Muts', 'n_clusters', 'Muts_in_clusters', 'Gene_score', 'Z_value', 'P_value', 'Q_value']
+		hdr = ['Gene', 'CGC', 'Gene_len', 'Gene_Muts', 'n_clusters']
 		if self.args.print_coord:
-			h_s.insert(5, 'Cluster_coordinates')
+			hdr += ['Cluster_coordinates']
+		hdr += ['Muts_in_clusters', 'Gene_score', 'Z_value', 'P_value', 'Q_value']
 
-		f_out = open(out_path, 'w')
-		f_out.write('\t'.join(h_s))
+		outf = open(out_path, 'w')
+		outf.write('\t'.join(hdr))
 
-		m_out = []
-		m_not_included_out = []
-		for gene in non_syn_gene_cluster_scores_dict:
+		output = []
+		output_tail = []
+		for gene in non_syn_gene_cluster_scores:
 			cgc = cgc[gene] if gene in cgc else ''
 			gene_len = int(cds_len[gene]) / 3
-			gene_muts = sum([non_syn_accum_mut_pos_dict[gene][pos] for pos in non_syn_accum_mut_pos_dict[gene].keys()])
-			n_clusters = len(non_syn_cluster_coordinates_dict[gene].keys())
+			gene_muts = sum([non_syn_accum_mut_pos[gene][pos] for pos in non_syn_accum_mut_pos[gene].keys()])
+			num_clusters = len(non_syn_cluster_coordinates[gene].keys())
 
-			if n_clusters > 0:
-				muts_clusters = sum(non_syn_cluster_muts_dict[gene].values())
-				gene_additive_cluster_score = non_syn_gene_cluster_scores_dict[gene]
-				z_ext = non_syn_gene_cluster_scores_external_z_dict[gene] if gene in non_syn_gene_cluster_scores_external_z_dict else 'NA'
-				l_out = [gene, cgc, gene_len, gene_muts, n_clusters, muts_clusters, gene_additive_cluster_score, z_ext]
+			if num_clusters > 0:
+				muts_clusters = sum(non_syn_cluster_muts[gene].values())
+				gene_additive_cluster_score = non_syn_gene_cluster_scores[gene]
+				zvalue = non_syn_gene_cluster_scores_external_z[gene] if gene in non_syn_gene_cluster_scores_external_z else 'NA'
+				row = [gene, cgc, gene_len, gene_muts, num_clusters]
 				if self.args.print_coord:
-					cluster_coordinates = get_cluster_coordinates_output(gene, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict)
-					l_out.insert(5, cluster_coordinates)
-				m_out.append(l_out)
+					cluster_coordinates = get_cluster_coordinates_output(gene, non_syn_cluster_coordinates, non_syn_cluster_muts)
+					row += [cluster_coordinates]
+				row += [muts_clusters, gene_additive_cluster_score, zvalue]
+				output.append(row)
 			else:
-				l_out = [gene, cgc, gene_len, gene_muts, 'NA', 'NA', 'NA', 'NA', 'NA']
+				row = [gene, cgc, gene_len, gene_muts, 'NA']
 				if self.args.print_coord:
-					l_out.insert(5, 'NA')
-				m_not_included_out.append(l_out)
+					row += ['NA']
+				row += ['NA', 'NA', 'NA', 'NA', 'NA']
+				output_tail.append(row)
 
+		output = sort_matrix(output, -1)
+		output = add_fdr(output, -1)
+		output += output_tail
 
-		m_out = order_matrix(m_out, -1)
-		m_out = add_fdr(m_out, -1)
-		m_out += m_not_included_out
-
-		for l_out in m_out:
-			f_out.write('\n' + '\t'.join(str(e) for e in l_out))
-		f_out.close()
+		for row in output:
+			outf.write('\n' + '\t'.join([str(v) for v in row]))
+		outf.close()
 
 		self.log.info("Output file created: {0}".format(os.path.basename(out_path)))
 

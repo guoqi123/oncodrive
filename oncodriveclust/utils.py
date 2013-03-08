@@ -97,7 +97,7 @@ def get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, sig_cut
 
 
 
-def add_fdr(matrix, pos= -1, sense = 'OVER'):
+def add_fdr(matrix, pos=-1, sense='OVER'):
 	'''
 	add a column with P value and another with FDR values to
 	the output_matrix (already ordered by Z)
@@ -105,8 +105,10 @@ def add_fdr(matrix, pos= -1, sense = 'OVER'):
 
 	#pnorm = robjects.r['pnorm']
 	#padj = robjects.r['p.adjust']
-	z = []
-	[z.append(float(l[-1])) for l in matrix] if sense == 'UNDER' else [z.append(float(l[-1]) * -1) for l in matrix]
+	if sense == 'OVER':
+		z = [float(row[pos]) * -1 for row in matrix]
+	else: # UNDER
+		z = [float(row[pos]) for row in matrix]
 
 	#rz = robjects.FloatVector(z)
 	#rp = pnorm(rz)
@@ -120,7 +122,7 @@ def add_fdr(matrix, pos= -1, sense = 'OVER'):
 	return matrix
 
 
-def order_matrix(matrix, position, order = 'DEC'):
+def sort_matrix(matrix, position, order = 'DEC'):
 	if order == 'DEC':
 		matrix.sort(key=itemgetter(position), reverse = True)
 	else:
