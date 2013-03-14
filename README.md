@@ -60,7 +60,7 @@ One problem that could arise is that scipy does not found the required libraries
 
 Then to get OncodriveCLUST installed run the following command:
 
-	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
+	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.3.tar.gz
 
 And that's all. The following command will allow you to check that is correctly installed by showing the command help:
 
@@ -98,10 +98,10 @@ OncodriveCLUST requires three input files, one must contain the protein affectin
 
 The first two files will be by default parsed as containing the gene symbol (i.e. *HUGO*) in the first column and the protein position in the last column. Any other column between the first and the last will be ignored. Note that each entry is assumed to be a different mutation (i.e, the mutation for a particular gene in a particular sample of the tumor cohort). The file containing CDS lengths have three columns: the gene symbol, the transcript symbol and the CDS length. OncodriveCLUST will get the gene CDS length from the longest transcript automatically.
 
-With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz) you will get some example files, a file containing transcripts CDS lengths and a file containing [CGC](http://www.sanger.ac.uk/genetics/CGP/Census/) phenotypes for known genes, so it is recommended to download and uncompress it (just click on the previous link, uncompress it and then change the current directory).
+With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.3.tar.gz) you will get some example files, a file containing transcripts CDS lengths and a file containing [CGC](http://www.sanger.ac.uk/genetics/CGP/Census/) phenotypes for known genes, so it is recommended to download and uncompress it (just click on the previous link, uncompress it and then change the current directory).
 
 ```
-(env) $ curl -o oncodriveclust.tar.gz https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
+(env) $ curl -o oncodriveclust.tar.gz https://bitbucket.org/bbglab/oncodriveclust/get/0.3.tar.gz
 (env) $ tar -xvf oncodriveclust.tar.gz
 (env) $ cd bbglab-oncodriveclust-<code>
 ```
