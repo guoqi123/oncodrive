@@ -60,7 +60,7 @@ One problem that could arise is that scipy does not found the required libraries
 
 Then to get OncodriveCLUST installed run the following command:
 
-	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz
+	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
 
 And that's all. The following command will allow you to check that is correctly installed by showing the command help:
 
@@ -98,11 +98,13 @@ OncodriveCLUST requires three input files, one must contain the protein affectin
 
 The first two files will be by default parsed as containing the gene symbol (i.e. *HUGO*) in the first column and the protein position in the last column. Any other column between the first and the last will be ignored. Note that each entry is assumed to be a different mutation (i.e, the mutation for a particular gene in a particular sample of the tumor cohort). The file containing CDS lengths have three columns: the gene symbol, the transcript symbol and the CDS length. OncodriveCLUST will get the gene CDS length from the longest transcript automatically.
 
-With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz) you will get some example files, a file containing transcripts CDS lengths and a file containing [CGC](http://www.sanger.ac.uk/genetics/CGP/Census/) phenotypes for known genes, so it is recommended to download and uncompress it (just click on the previous link, uncompress it and then change the current directory).
+With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz) you will get some example files, a file containing transcripts CDS lengths and a file containing [CGC](http://www.sanger.ac.uk/genetics/CGP/Census/) phenotypes for known genes, so it is recommended to download and uncompress it (just click on the previous link, uncompress it and then change the current directory).
 
-	(env) $ curl -o oncodriveclust.tar.gz https://bitbucket.org/bbglab/oncodriveclust/get/0.2.tar.gz
-	(env) $ tar -xvf oncodriveclust.tar.gz
-	(env) $ cd bbglab-oncodriveclust-<code>
+```
+(env) $ curl -o oncodriveclust.tar.gz https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
+(env) $ tar -xvf oncodriveclust.tar.gz
+(env) $ cd bbglab-oncodriveclust-<code>
+```
 
 We also provide with more [examples in a separate compressed file](https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust-examples.tar.gz).
 
@@ -116,14 +118,14 @@ The use of "--cgc data/CGC_phenotype.tsv" is optional, but if specified then the
 
 The results file will look something like:
 
-	(env) $ head oncodriveclust_minMuts3.txt
-	Gene	CGC	Gene_len	Gene_Muts	n_clusters	Muts_in_clusters	Gene_score	Z_value	P_value	Q_value
-	KRAS	Dom	190	3	1	3	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
-	KLRG2		410	3	1	3	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
-	KRT38		457	3	1	3	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
-	AKT1	Dom	481	12	1	11	0.916666666667	3.79776654893	7.30028674072e-05	0.00187982383574
-	PIK3CA	Dom	1069	186	7	178	0.855624278036	3.52018384847	0.00021562388305	0.00444185199083
-	VASN		674	5	1	4	0.8	3.26723933475	0.000543009128935	0.00932165671338
-	KIF19		999	3	1	3	0.784521187523	3.1968513525	0.000694682523388	0.0100330867162
-	ZNF598		905	4	1	3	0.75	3.03987052868	0.00118339934876	0.0100330867162
-	FGFR2	Dom	823	4	1	3	0.75	3.03987052868	0.00118339934876	0.0100330867162
+	(env) $ head oncodriveclust-results.tsv
+	GENE	CGC	GENE_LEN	GENE_NUM_MUTS	MUTS_IN_CLUST	NUM_CLUSTERS	GENE_SCORE	ZSCORE	PVALUE	QVALUE
+    KRAS	Dom	190	3	3	1	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
+    KLRG2		410	3	3	1	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
+    KRT38		457	3	3	1	1.0	4.17671455905	1.47874885544e-05	0.0005077037737
+    AKT1	Dom	481	12	11	1	0.916666666667	3.79776654893	7.30028674072e-05	0.00187982383574
+    PIK3CA	Dom	1069	186	178	7	0.855624278036	3.52018384847	0.00021562388305	0.00444185199083
+    VASN		674	5	4	1	0.8	3.26723933475	0.000543009128935	0.00932165671338
+    KIF19		999	3	3	1	0.784521187523	3.1968513525	0.000694682523388	0.0100330867162
+    ZNF598		905	4	3	1	0.75	3.03987052868	0.00118339934876	0.0100330867162
+    FGFR2	Dom	823	4	3	1	0.75	3.03987052868	0.00118339934876	0.0100330867162
