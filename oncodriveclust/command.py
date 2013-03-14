@@ -6,7 +6,7 @@ from . import VERSION
 from analysis import OncodriveClustAnalysis
 from utils import *
 
-_log_level_map = {
+_LOG_LEVELS = {
 	"debug" : logging.DEBUG,
 	"info" : logging.INFO,
 	"warn" : logging.WARN,
@@ -20,7 +20,7 @@ class Command(object):
 
 		self._add_arguments(parser)
 
-		parser.add_argument("-L", "--log-level", dest="log_level", metavar="LEVEL", default=None,
+		parser.add_argument("-L", "--log-level", dest="log_level", metavar="LEVEL", default="info",
 							choices=["debug", "info", "warn", "error", "critical", "notset"],
 							help="Define the loggging level")
 
@@ -30,12 +30,9 @@ class Command(object):
 			format = "%(asctime)s %(name)s %(levelname)-5s : %(message)s",
 			datefmt = "%Y-%m-%d %H:%M:%S")
 
-		if self.args.log_level is None:
-			self.args.log_level = "info"
-		else:
-			self.args.log_level = self.args.log_level.lower()
+		self.args.log_level = self.args.log_level.lower()
 
-		logging.getLogger("oncodriveclust").setLevel(_log_level_map[self.args.log_level])
+		logging.getLogger("oncodriveclust").setLevel(_LOG_LEVELS[self.args.log_level])
 
 		self.log = logging.getLogger("oncodriveclust")
 
@@ -87,10 +84,8 @@ class OncodriveClustCommand(Command):
 		parser.add_argument("-c", "--coord", dest="print_coord", action = "store_true",
 		        help="Use this argument for printing cluster coordinates in the output file")
 
-		parser.add_argument("-p", "--pos", dest="pos_pos", type=int, default=-1, metavar="INT",
+		parser.add_argument("-p", "--pos", dest="pos_index", type=int, default=-1, metavar="INT",
 							help="AA position column index ('-1' by default)")
-	
-		self.args = parser.parse_args()
 
 	def _check_args(self):
 		if not os.path.exists(self.args.syn_path) or not os.path.exists(self.args.non_syn_path):
@@ -99,59 +94,58 @@ class OncodriveClustCommand(Command):
 			exit(-1)
 
 		if not self.args.output_path:
-			self.args.output_path = os.path.join(os.getcwd(), "oncodriveclust")
+			self.args.output_path = os.path.join(os.getcwd(), "oncodriveclust-results.tsv")
 
-	def create_output_file(self, cds_dict, cgc_dict,
-						   non_syn_accum_mut_pos_dict, non_syn_cluster_coordinates_dict,
-						   syn_gene_cluster_scores_dict, non_syn_gene_cluster_scores_dict,
-						   non_syn_cluster_muts_dict, non_syn_gene_cluster_scores_external_z_dict):
+	def create_output_file(self, cds_len, cgc,
+						   non_syn_accum_mut_pos, non_syn_cluster_coordinates,
+						   syn_gene_cluster_scores, non_syn_gene_cluster_scores,
+						   non_syn_cluster_muts, non_syn_gene_cluster_scores_external_z):
 
-		out_path = "".join([self.args.output_path,
-							 '_minMuts' + str(self.args.min_gene_mutations),
-							 '.txt'])
+		out_path = self.args.output_path
 
 		self.log.debug("> {0}".format(out_path))
 
-		h_s = ['Gene', 'CGC', 'Gene_len', 'Gene_Muts', 'n_clusters', 'Muts_in_clusters', 'Gene_score', 'Z_value', 'P_value', 'Q_value']
+		hdr = ['GENE', 'CGC', 'GENE_LEN', 'GENE_NUM_MUTS', 'MUTS_IN_CLUST', 'NUM_CLUSTERS']
 		if self.args.print_coord:
-			h_s.insert(5, 'Cluster_coordinates')
+			hdr += ['CLUST_COORDS']
+		hdr += ['GENE_SCORE', 'ZSCORE', 'PVALUE', 'QVALUE']
 
-		f_out = open(out_path, 'w')
-		f_out.write('\t'.join(h_s))
+		outf = open(out_path, 'w')
+		outf.write('\t'.join(hdr))
 
-		m_out = []
-		m_not_included_out = []
-		for gene in non_syn_gene_cluster_scores_dict:
-			cgc = cgc_dict[gene] if gene in cgc_dict else ''
-			gene_len = int(cds_dict[gene]) / 3
-			gene_muts = sum([non_syn_accum_mut_pos_dict[gene][pos] for pos in non_syn_accum_mut_pos_dict[gene].keys()])
-			n_clusters = len(non_syn_cluster_coordinates_dict[gene].keys())
+		output = []
+		output_tail = []
+		for gene in non_syn_gene_cluster_scores:
+			cgc_phen = cgc[gene] if gene in cgc else ''
+			gene_len = int(cds_len[gene]) / 3
+			gene_muts = sum([non_syn_accum_mut_pos[gene][pos] for pos in non_syn_accum_mut_pos[gene].keys()])
+			num_clusters = len(non_syn_cluster_coordinates[gene].keys())
 
-			if n_clusters > 0:
-				muts_clusters = sum(non_syn_cluster_muts_dict[gene].values())
-				gene_additive_cluster_score = non_syn_gene_cluster_scores_dict[gene]
-				z_ext = non_syn_gene_cluster_scores_external_z_dict[gene] if gene in non_syn_gene_cluster_scores_external_z_dict else 'NA'
-				l_out = [gene, cgc, gene_len, gene_muts, n_clusters, muts_clusters, gene_additive_cluster_score, z_ext]
+			if num_clusters > 0:
+				muts_clusters = sum(non_syn_cluster_muts[gene].values())
+				gene_additive_cluster_score = non_syn_gene_cluster_scores[gene]
+				zscore = non_syn_gene_cluster_scores_external_z[gene] if gene in non_syn_gene_cluster_scores_external_z else 'NA'
+				row = [gene, cgc_phen, gene_len, gene_muts, muts_clusters, num_clusters]
 				if self.args.print_coord:
-					cluster_coordinates = get_cluster_coordinates_output(gene, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict)
-					l_out.insert(5, cluster_coordinates)
-				m_out.append(l_out)
+					cluster_coordinates = get_cluster_coordinates_output(gene, non_syn_cluster_coordinates, non_syn_cluster_muts)
+					row += [cluster_coordinates]
+				row += [gene_additive_cluster_score, zscore]
+				output.append(row)
 			else:
-				l_out = [gene, cgc, gene_len, gene_muts, 'NA', 'NA', 'NA', 'NA', 'NA']
+				row = [gene, cgc_phen, gene_len, gene_muts, 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']
 				if self.args.print_coord:
-					l_out.insert(5, 'NA')
-				m_not_included_out.append(l_out)
+					row += ['NA']
+				output_tail.append(row)
 
+		output = sort_matrix(output, -1)
+		output = add_fdr(output, -1)
+		output += output_tail
 
-		m_out = order_matrix(m_out, -1)
-		m_out = add_fdr(m_out, -1)
-		m_out += m_not_included_out
+		for row in output:
+			outf.write('\n' + '\t'.join([str(v) for v in row]))
+		outf.close()
 
-		for l_out in m_out:
-			f_out.write('\n' + '\t'.join(str(e) for e in l_out))
-		f_out.close()
-
-		self.log.info("Output file created: {0}".format(out_path))
+		self.log.info("Output file created: {0}".format(os.path.basename(out_path)))
 
 	def load_map_from_resource(self, resource_path, key_index=0, value_index=1):
 		from pkg_resources import resource_stream
@@ -202,6 +196,35 @@ class OncodriveClustCommand(Command):
 					cds_len[gene] = length
 		return cds_len
 
+	def load_gene_acum_positions(self, mut_fp, pos_index):
+		'''
+		returns a dict with the number (absolute) of mutations
+		in each position of each gene: {gene: {pos:accumulated_mutations}}
+		'''
+
+		accum_pos = {}
+		with open(mut_fp, 'r') as f:
+			f.readline() # discard header
+			for line in f:
+				if line.lstrip().startswith("#"):
+					continue
+
+				fields = line.rstrip("\n").split('\t')
+				try:
+					gene, pos = fields[0], int(fields[pos_index])
+				except:
+					#the position entry contains a non valid value (i.e. a non integer)
+					continue
+
+				if gene not in accum_pos:
+					accum_pos[gene] = {pos: 1}
+				elif pos not in accum_pos[gene]:
+					accum_pos[gene][pos] = 1
+				else:
+					accum_pos[gene][pos] += 1
+
+		return accum_pos
+
 	def run(self):
 		'''
 		Note that I need as input two tdm files, in which each entry is a mutation.
@@ -223,12 +246,23 @@ class OncodriveClustCommand(Command):
 		else:
 			cgc = {}
 
+		#dict = {gene: {pos: num_mutations}}
+
+		self.log.info("Loading non synonymous mutations ...")
+		self.log.debug("> {0}".format(self.args.non_syn_path))
+		non_syn_accum_mut_pos = self.load_gene_acum_positions(self.args.non_syn_path, self.args.pos_index)
+		self.log.debug("  {0} genes".format(len(non_syn_accum_mut_pos)))
+
+		self.log.info("Loading synonymous mutations ...")
+		self.log.debug("> {0}".format(self.args.syn_path))
+		syn_accum_mut_pos = self.load_gene_acum_positions(self.args.syn_path, self.args.pos_index)
+		self.log.debug("  {0} genes".format(len(syn_accum_mut_pos)))
+		
 		self.log.info("Running analysis ...")
 
 		results = analysis.run(
-			self.args.syn_path, self.args.non_syn_path,
-			self.args.pos_pos, self.args.min_gene_mutations,
-			cds_len)
+			non_syn_accum_mut_pos, syn_accum_mut_pos,
+			self.args.min_gene_mutations, cds_len)
 
 		self.log.info("Saving results ...")
 

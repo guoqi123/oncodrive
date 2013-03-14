@@ -97,7 +97,7 @@ def get_binomial_minimum_mut_per_position_threshold(gene_len, gene_muts, sig_cut
 
 
 
-def add_fdr(matrix, pos= -1, sense = 'OVER'):
+def add_fdr(matrix, pos=-1, sense='OVER'):
 	'''
 	add a column with P value and another with FDR values to
 	the output_matrix (already ordered by Z)
@@ -105,8 +105,10 @@ def add_fdr(matrix, pos= -1, sense = 'OVER'):
 
 	#pnorm = robjects.r['pnorm']
 	#padj = robjects.r['p.adjust']
-	z = []
-	[z.append(float(l[-1])) for l in matrix] if sense == 'UNDER' else [z.append(float(l[-1]) * -1) for l in matrix]
+	if sense == 'OVER':
+		z = [float(row[pos]) * -1 for row in matrix]
+	else: # UNDER
+		z = [float(row[pos]) for row in matrix]
 
 	#rz = robjects.FloatVector(z)
 	#rp = pnorm(rz)
@@ -120,7 +122,7 @@ def add_fdr(matrix, pos= -1, sense = 'OVER'):
 	return matrix
 
 
-def order_matrix(matrix, position, order = 'DEC'):
+def sort_matrix(matrix, position, order = 'DEC'):
 	if order == 'DEC':
 		matrix.sort(key=itemgetter(position), reverse = True)
 	else:
@@ -132,10 +134,11 @@ def order_matrix(matrix, position, order = 'DEC'):
 ##
 ##   Auxiliar
 ###################################################3
+
 def get_cluster_coordinates_output(gene, non_syn_cluster_coordinates_dict, non_syn_cluster_muts_dict):
 	out_l = []
 	for cluster_id in non_syn_cluster_coordinates_dict[gene]:
-		cluster_coordinates = str(non_syn_cluster_coordinates_dict[gene][cluster_id])
+		cluster_coordinates = "[{0}]".format(",".join([str(x) for x in non_syn_cluster_coordinates_dict[gene][cluster_id]]))
 		n_muts = str(non_syn_cluster_muts_dict[gene][cluster_id])
 		out_l.append(cluster_coordinates + ':' + n_muts)
 	return ','.join(out_l)
