@@ -189,6 +189,7 @@ class OncodriveClustCommand(Command):
 					self.log.warn("Expected 3 columns (gene, transcript, CDS length) but found: {0}".format(line))
 					continue
 				gene, trs, length = fields
+				length = int(length)
 				if gene in cds_len:
 					if length > cds_len[gene]:
 						cds_len[gene] = length

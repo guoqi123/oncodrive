@@ -17,8 +17,7 @@ from oncodriveclust import VERSION, AUTHORS, AUTHORS_EMAIL
 setup(
 	name = "oncodriveclust",
 	version = VERSION,
-	packages = ["oncodriveclust"],
-	scripts = [],
+	packages = find_packages(),
 
 	install_requires = [
 		#"numpy==1.6.1",
