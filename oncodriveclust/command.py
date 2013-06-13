@@ -84,8 +84,18 @@ class OncodriveClustCommand(Command):
 		parser.add_argument("-c", "--coord", dest="print_coord", action = "store_true",
 		        help="Use this argument for printing cluster coordinates in the output file")
 
-		parser.add_argument("-p", "--pos", dest="pos_index", type=int, default=-1, metavar="INT",
+		parser.add_argument("--pos", dest="pos_index", type=int, default=-1, metavar="INT",
 							help="AA position column index ('-1' by default)")
+
+		parser.add_argument("-d", "--dist", dest="intraclust_max_distance", type=int, default=5, metavar="INT",
+		                    help="Intra cluster maximum distance ('5' by default)")
+
+		parser.add_argument("-p", "--prob", dest="binom_noise_p", type=float, default=0.01, metavar="FLOAT",
+		                    help="Probability of the binomial model to find cluster seeds ('0.01' by default)")
+
+		parser.add_argument("--dom", dest="dom_path", metavar="PATH",
+		                    help="The path of a file containing gene domains")
+
 
 	def _check_args(self):
 		if not os.path.exists(self.args.syn_path) or not os.path.exists(self.args.non_syn_path):
@@ -96,7 +106,7 @@ class OncodriveClustCommand(Command):
 		if not self.args.output_path:
 			self.args.output_path = os.path.join(os.getcwd(), "oncodriveclust-results.tsv")
 
-	def create_output_file(self, cds_len, cgc,
+	def create_output_file(self, cds_len, cgc, dom,
 						   non_syn_accum_mut_pos, non_syn_cluster_coordinates,
 						   syn_gene_cluster_scores, non_syn_gene_cluster_scores,
 						   non_syn_cluster_muts, non_syn_gene_cluster_scores_external_z):
@@ -108,6 +118,8 @@ class OncodriveClustCommand(Command):
 		hdr = ['GENE', 'CGC', 'GENE_LEN', 'GENE_NUM_MUTS', 'MUTS_IN_CLUST', 'NUM_CLUSTERS']
 		if self.args.print_coord:
 			hdr += ['CLUST_COORDS']
+		if self.args.dom_path is not None:
+			hdr += ['DOM_COORDS']
 		hdr += ['GENE_SCORE', 'ZSCORE', 'PVALUE', 'QVALUE']
 
 		outf = open(out_path, 'w')
@@ -117,6 +129,7 @@ class OncodriveClustCommand(Command):
 		output_tail = []
 		for gene in non_syn_gene_cluster_scores:
 			cgc_phen = cgc[gene] if gene in cgc else ''
+			prot_dom = dom[gene] if gene in dom else ''
 			gene_len = int(cds_len[gene]) / 3
 			gene_muts = sum([non_syn_accum_mut_pos[gene][pos] for pos in non_syn_accum_mut_pos[gene].keys()])
 			num_clusters = len(non_syn_cluster_coordinates[gene].keys())
@@ -129,6 +142,8 @@ class OncodriveClustCommand(Command):
 				if self.args.print_coord:
 					cluster_coordinates = get_cluster_coordinates_output(gene, non_syn_cluster_coordinates, non_syn_cluster_muts)
 					row += [cluster_coordinates]
+				if self.args.dom_path is not None:
+					row += [prot_dom]
 				row += [gene_additive_cluster_score, zscore]
 				output.append(row)
 			else:
@@ -247,6 +262,12 @@ class OncodriveClustCommand(Command):
 		else:
 			cgc = {}
 
+		if self.args.dom_path is not None:
+			self.log.info("Loading protein domains data..")
+			dom = self.load_map(self.args.dom_path)
+		else:
+			dom = {}
+
 		#dict = {gene: {pos: num_mutations}}
 
 		self.log.info("Loading non synonymous mutations ...")
@@ -263,11 +284,11 @@ class OncodriveClustCommand(Command):
 
 		results = analysis.run(
 			non_syn_accum_mut_pos, syn_accum_mut_pos,
-			self.args.min_gene_mutations, cds_len)
+			self.args.min_gene_mutations, cds_len, self.args.intraclust_max_distance, self.args.binom_noise_p)
 
 		self.log.info("Saving results ...")
 
-		self.create_output_file(cds_len, cgc, *results)
+		self.create_output_file(cds_len, cgc, dom, *results)
 
 
 def main():

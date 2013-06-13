@@ -5,11 +5,10 @@ from utils import *
 class OncodriveClustAnalysis(object):
 
 	#states the max number of aminoacids between 2 positions to group them into the same cluster
-	INTRA_CLUSTER_MAX_DISTANCE = 5
+	#INTRACLUSTER_MAX_DISTANCE = 5
 
 	#the (minimum) probability threshold to consider the amount of mutations of a position as significant
-	#BINOMIAL_SIG_THRESHOLD_PER_POSITION = 0.01
-	NOISE_BINOM_P_THRESHOLD = 0.01
+	#NOISE_BINOM_P_THRESHOLD = 0.01
 
 	#each position is weighted by correction^d, so the more widespread is the mut distribution within the cluster, the lower is the score
 	CLUSTER_SCORE_CORRECTION = 1.4142
@@ -31,11 +30,10 @@ class OncodriveClustAnalysis(object):
 
 	def get_default_background_values(self):
 		scores_mean, scores_sd = self.EXTERNAL_NULL_MODEL['mean'], self.EXTERNAL_NULL_MODEL['sd']
-		self.log.warn('A predefined background model retrieved from a merge of other cancer datasets will be used.')
-		self.log.warn('Default background score values --> mean={0}, sd={1}'.format(scores_mean, scores_sd))
+		self.log.warn('Background score values --> mean={0}, sd={1}'.format(scores_mean, scores_sd))
 		return scores_mean, scores_sd
 
-	def get_gene_clusters(self, gene, gene_len, gene_muts, gene_accum_mut_pos, cds):
+	def get_gene_clusters(self, gene, gene_len, gene_muts, gene_accum_mut_pos, cds, intracluster_d, binom_noise_p):
 		'''
 		First, it calculate the meaningful positions which are those with the minimum number of positions that
 		are expected by less than 1% of probability according to the binomial model
@@ -48,12 +46,11 @@ class OncodriveClustAnalysis(object):
 		#The 'meaninful positions are those that have less than 1% of being found by chance. This is a binomial
 		# cumulated probability model in which p(X >=n) = 1 - p(X <=(n-1)), where the parameters are: prob_of_success = 1/len_gene
 		# and num_of_success = n, and num_of_trials = num_of_mutations
-		#print '\nGetting gene meaningful positions..'
 
 		#call func to return the minimum number of mutations per position to be included in the cluster
 		# (note that 'self.NOISE_BINOM_P_THRESHOLD' is a global constant)
 		minimum_mut_per_position_threshold = get_binomial_minimum_mut_per_position_threshold(
-							gene_len, gene_muts, self.NOISE_BINOM_P_THRESHOLD, self.MIN_MUTS_PER_MEANINGF_POS)
+							gene_len, gene_muts, binom_noise_p, self.MIN_MUTS_PER_MEANINGF_POS)
 
 		#given the minimum # of muts per position to be included in a cluster, retrieve the positions
 		significant_gene_positions = self.get_significant_gene_positions(
@@ -66,19 +63,16 @@ class OncodriveClustAnalysis(object):
 		#given the significant positions, group them
 		# (applying the constraint of NOISE_BINOM_P_THRESHOLD, which is a global variable)
 		# gene_dict = {cluster_id: [meaningful_pos_init, meaningful_pos_end]}
-		gene_meaningful_cluster_dict = self.group_meaningful_positions(gene, significant_gene_positions)
+		gene_meaningful_cluster_dict = self.group_meaningful_positions(gene, significant_gene_positions, intracluster_d)
 
 		#given the meaningful positions, check if there is some non meaningful position around
 		gene_extended_meaningful_cluster = self.extend_meaningful_cluster(
-													gene, gene_meaningful_cluster_dict, gene_accum_mut_pos, cds)
-
-		#print 'Gene {0} and cluster dict is {1}'.format(gene, gene_meaningful_cluster_dict)
-		#print 'Gene {0} and cluster extended dict is {1}'.format(gene, gene_extended_meaningful_cluster_dict)
+													gene, gene_meaningful_cluster_dict, gene_accum_mut_pos, cds, intracluster_d)
 
 		return gene_extended_meaningful_cluster
 
 
-	def cluster_mutations(self, accum_mut_pos, min_gene_mutations, cds):
+	def cluster_mutations(self, accum_mut_pos, min_gene_mutations, cds, intracluster_d, binom_noise_p):
 		'''
 		(A) Define meaningful positions in each gene, i.e. those positions showing a non-syn mutation occurrence higher than expected by chance.
 
@@ -111,7 +105,7 @@ class OncodriveClustAnalysis(object):
 			#         according to binomial cumulated probability; (b) the remaining 'meaningful' positions are grouped by
 			#         using with the constraint that two positios of the same cluster can not be separated by more than 'n' AAs
 			#   dict = {gene: {cluster_id: [pos_init, pos_end]}}
-			cluster_coordinates[gene] = self.get_gene_clusters(gene, gene_len, gene_muts, accum_mut_pos[gene], cds)
+			cluster_coordinates[gene] = self.get_gene_clusters(gene, gene_len, gene_muts, accum_mut_pos[gene], cds, intracluster_d, binom_noise_p)
 
 		return cluster_coordinates
 
@@ -211,17 +205,11 @@ class OncodriveClustAnalysis(object):
 		if len(scores) < self.MIN_BACKGROUND_ENTRIES:
 			self.log.warn('There is not the minimum {0} coding silent entries in the dataset to construct the background model.' \
 				.format(self.MIN_BACKGROUND_ENTRIES))
+			self.log.warn('Predefined background model constructed by using available cancer data projects will be used!')
 			scores_mean, scores_sd = self.get_default_background_values()
 		else:
 			scores_mean, scores_sd = calculate_mean_and_sd(scores)
-			'''                        
-			if scores_sd * 0.8 > scores_mean:
-				self.log.warn('It seems that the distribution of the background model is not normal: {0} ({1})'\
-					   .format(scores_mean, scores_sd))
-				scores_mean, scores_sd = self.get_default_background_values()
-			
-			self.log.info('The background model values is: {0}({1})'.format(scores_mean, scores_sd))
-			'''
+
 		#then, i compare each value with the overall distribution
 		for gene in gene_cluster_scores:
 			gene_cluster_scores_external_z[gene] = get_z(gene_cluster_scores[gene], scores_mean, scores_sd)
@@ -241,12 +229,12 @@ class OncodriveClustAnalysis(object):
 				significant_gene_positions.append(pos)
 		return significant_gene_positions
 
-	def group_meaningful_positions(self, gene, gene_meaningful_positions):
+	def group_meaningful_positions(self, gene, gene_meaningful_positions, intraclust_d):
 		sorted_gene_meaningful_positions = sorted(gene_meaningful_positions)
 		cluster_id = 1
 		tmp_cluster_dict = {cluster_id: [sorted_gene_meaningful_positions[0]]}
 		for i in range(1, len(sorted_gene_meaningful_positions)):
-			if sorted_gene_meaningful_positions[i] <= sorted_gene_meaningful_positions[i-1] + self.INTRA_CLUSTER_MAX_DISTANCE:
+			if sorted_gene_meaningful_positions[i] <= sorted_gene_meaningful_positions[i-1] + intraclust_d:
 				tmp_cluster_dict[cluster_id].append(sorted_gene_meaningful_positions[i])
 			else:	
 				cluster_id += 1
@@ -267,13 +255,13 @@ class OncodriveClustAnalysis(object):
 			elif direction == 'right':
 				return pos + ((gene_meaningful_cluster[cluster_id + 1][0] - pos) / 2)
 
-	def calculate_limit_cluster(self, gene, pos, limit_pos, gene_mut_positions, direction):
+	def calculate_limit_cluster(self, gene, pos, limit_pos, gene_mut_positions, intraclust_d, direction):
 		if direction == 'right':
 			sorted_mut_pos = sorted(gene_mut_positions)
 			for mut_pos in sorted_mut_pos:
 				if mut_pos > limit_pos:
 					return pos
-				if pos < mut_pos <= pos + self.INTRA_CLUSTER_MAX_DISTANCE:
+				if pos < mut_pos <= pos + intraclust_d:
 					pos = mut_pos
 			return pos
 		elif direction == 'left':
@@ -281,11 +269,11 @@ class OncodriveClustAnalysis(object):
 			for mut_pos in reversed_mut_pos:
 				if mut_pos < limit_pos:
 					return pos
-				if pos - self.INTRA_CLUSTER_MAX_DISTANCE <= mut_pos < pos:
+				if pos - intraclust_d <= mut_pos < pos:
 					pos = mut_pos
 			return pos
 
-	def extend_meaningful_cluster(self, gene, gene_meaningful_cluster, gene_accum_mut_pos, cds_len):
+	def extend_meaningful_cluster(self, gene, gene_meaningful_cluster, gene_accum_mut_pos, cds_len, intraclust_d):
 		'''
 		Receive a dict with the meaningful positions already grouped ({cluster_id: [pos_init, pos_end]}) and it tries to extend
 		'''
@@ -298,8 +286,8 @@ class OncodriveClustAnalysis(object):
 			limit_init = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster, cluster_id, init, 'left', cds_len)
 			limit_end = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster, cluster_id, end, 'right', cds_len)
 
-			init = self.calculate_limit_cluster(gene, init, limit_init, gene_accum_mut_pos.keys(), 'left')
-			end = self.calculate_limit_cluster(gene, end, limit_end, gene_accum_mut_pos.keys(), 'right')
+			init = self.calculate_limit_cluster(gene, init, limit_init, gene_accum_mut_pos.keys(), intraclust_d, 'left')
+			end = self.calculate_limit_cluster(gene, end, limit_end, gene_accum_mut_pos.keys(), intraclust_d, 'right')
 
 			gene_extended_meaningful_cluster[cluster_id] = [init, end]
 
@@ -310,17 +298,17 @@ class OncodriveClustAnalysis(object):
 	##   FUNCTION_CALLING
 	###################################################3
 
-	def run(self, non_syn_accum_mut_pos, syn_accum_mut_pos, min_gene_mutations, cds_len):
+	def run(self, non_syn_accum_mut_pos, syn_accum_mut_pos, min_gene_mutations, cds_len, intracluster_d, binom_noise_p):
 
 		# (A) Define the mutation clusters
 		#dict = {gene:{cluster_id:[pos_init, pos_end]}}
 		self.log.info("Grouping the lowly expected mutations into clusters ...")
 
 		self.log.info("  Non synonymous mutations ...")
-		non_syn_cluster_coordinates = self.cluster_mutations(non_syn_accum_mut_pos, min_gene_mutations, cds_len)
+		non_syn_cluster_coordinates = self.cluster_mutations(non_syn_accum_mut_pos, min_gene_mutations, cds_len, intracluster_d, binom_noise_p)
 
 		self.log.info("  Synonymous mutations ...")
-		syn_cluster_coordinates = self.cluster_mutations(syn_accum_mut_pos, min_gene_mutations, cds_len)
+		syn_cluster_coordinates = self.cluster_mutations(syn_accum_mut_pos, min_gene_mutations, cds_len, intracluster_d, binom_noise_p)
 
 		#(B) Define the score of each cluster
 		#-----> (B1) Calculate the mutations enclosed within each cluster
