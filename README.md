@@ -80,16 +80,23 @@ And that's all. The following command will allow you to check that is correctly 
 	  GENE-TRANSCRIPTS     The path of a file containing transcripts length for
 						   genes
 
-	optional arguments:
-	  -h, --help           show this help message and exit
-	  --version            show program's version number and exit
-	  -o PATH, --out PATH  Define the output file path
-	  --cgc PATH           The path of a file containing CGC data
-	  -m INT, --muts INT   Minimum number of mutations of a gene to be included in
-						   the analysis ('5' by default)
-	  -c, --coord          Use this argument for printing cluster coordinates in
-						   the output file
-	  -p INT, --pos INT    AA position column index ('-1' by default)
+    optional arguments:
+      -h, --help            show this help message and exit
+      --version             show program's version number and exit
+      -o PATH, --out PATH   Define the output file path
+      --cgc PATH            The path of a file containing CGC data
+      -m INT, --muts INT    Minimum number of mutations of a gene to be included
+                            in the analysis ('5' by default)
+      -c, --coord           Use this argument for printing cluster coordinates in
+                            the output file
+      --pos INT             AA position column index ('-1' by default)
+      -d INT, --dist INT    Intra cluster maximum distance ('5' by default)
+      -p FLOAT, --prob FLOAT
+                            Probability of the binomial model to find cluster
+                            seeds ('0.01' by default)
+      --dom PATH            The path of a file containing gene domains
+      -L LEVEL, --log-level LEVEL
+                            Define the loggging level
 
 
 ### Running an example ###
@@ -129,3 +136,5 @@ The results file will look something like:
     KIF19		999	3	3	1	0.784521187523	3.1968513525	0.000694682523388	0.0100330867162
     ZNF598		905	4	3	1	0.75	3.03987052868	0.00118339934876	0.0100330867162
     FGFR2	Dom	823	4	3	1	0.75	3.03987052868	0.00118339934876	0.0100330867162
+
+In addition, the user can add a column with the details of the clusters identified by OncodriveCLUST (i.e. aa_start and aa_end delimiting such clusters and the number of mutations enclosed in each) by using the -c argument. Finally, the domains of the protein encoded by each gene can be added as another column in the output by using the --dom argument: "--dom data/pfam_domains.txt". In this file, we provide the data retrieved from Pfam; the user can use another self-prepared file if desired by indicating the corresponding path to this file.
