@@ -20,10 +20,10 @@ setup(
 	packages = find_packages(),
 
 	install_requires = [
-		#"numpy==1.6.1",
-		#"scipy==0.9.0",
-		#"pandas==0.10.1",
-		#"statsmodels==0.4",
+		#"numpy==1.7.1",
+		#"scipy==0.12.0",
+		#"pandas==0.12.0",
+		#"statsmodels==0.4.3",
 	],
 
 	include_package_data = True,
