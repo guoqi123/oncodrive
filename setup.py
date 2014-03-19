@@ -7,12 +7,9 @@ OncodriveCLUST is a method aimed to identify genes whose mutations are biased to
 The method does not assume that the baseline mutation probability is homogeneous across all gene positions but it creates a background model using silent mutations. Coding silent mutations are supposed to be under no positive selection and may reflect the baseline clustering of somatic mutations. Given recent evidences of non-random mutation processes along the genome, the assumption of homogenous mutation probabilities is likely an oversimplication introducing bias in the detection of meaningful events.
 """
 
-import distribute_setup
-distribute_setup.use_setuptools()
-
 from setuptools import setup, find_packages
 
-from oncodriveclust import VERSION, AUTHORS, AUTHORS_EMAIL
+from oncodriveclust import VERSION, AUTHORS, CONTACT_EMAIL
 
 setup(
 	name = "oncodriveclust",
@@ -36,9 +33,9 @@ setup(
 
 	# metadata for upload to PyPI
 	author = AUTHORS,
-	author_email = AUTHORS_EMAIL,
+	author_email = CONTACT_EMAIL,
 	description = "OncodriveCLUST",
-	license = "AGPL 3.0",
+	license = "UPF Free Source Code",
 	keywords = "",
 	url = "https://bitbucket.org/bbglab/oncodriveclust",
 	long_description = __doc__,
@@ -46,7 +43,6 @@ setup(
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"Intended Audience :: Bioinformatics",
-		"License :: OSI Approved :: GNU Affero General Public License (AGPL)",
 		"Environment :: Console",
 		"Intended Audience :: Science/Research",
 		"Natural Language :: English",
