@@ -1,3 +1,3 @@
-VERSION = "0.4"
+VERSION = "0.4.1"
 AUTHORS = "Barcelona Biomedical Genomics research group"
-AUTHORS_EMAIL = "nuria.lopez@upf.edu"
+CONTACT_EMAIL = "nuria.lopez@upf.edu"
