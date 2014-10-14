@@ -5,6 +5,7 @@ import scipy
 from operator import itemgetter
 
 from statsmodels.sandbox.stats.multicomp import fdrcorrection0
+from functools import reduce
 
 ###################################################
 ##
@@ -13,7 +14,7 @@ from statsmodels.sandbox.stats.multicomp import fdrcorrection0
 
 def factorial(n):
 	if n < 2: return 1
-	return reduce(lambda x, y: x*y, xrange(2, int(n)+1))
+	return reduce(lambda x, y: x*y, range(2, int(n)+1))
 
 def get_binom_prob(s, n, p):
 	x = 1.0 - p
@@ -21,7 +22,7 @@ def get_binom_prob(s, n, p):
 	b = s + 1.0
 	c = a + b - 1.0
 	prob = 0
-	for j in xrange(a, int(c) + 1):
+	for j in range(a, int(c) + 1):
 		prob += factorial(c) / (factorial(j)*factorial(c-j)) * x**j * (1 - x)**(c-j)
 	return prob
 
