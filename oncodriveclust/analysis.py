@@ -1,6 +1,6 @@
 import logging
 
-from utils import *
+from .utils import *
 
 class OncodriveClustAnalysis(object):
 
@@ -89,7 +89,7 @@ class OncodriveClustAnalysis(object):
 		#---> Retrieval of clusters per gene
 		for gene in genes_sorted:
 			#---> (1) get the number of mutations of the gene
-			gene_muts = sum([accum_mut_pos[gene][pos] for pos in accum_mut_pos[gene].keys()])
+			gene_muts = sum([accum_mut_pos[gene][pos] for pos in list(accum_mut_pos[gene].keys())])
 
 			# if there are few muts, as stated by the user (default =5),the gene is not included
 			if gene_muts < min_gene_mutations:
@@ -121,7 +121,7 @@ class OncodriveClustAnalysis(object):
 		'''
 
 		cluster_summary_dict = {}
-		for gene in cluster_coordinates.keys():
+		for gene in list(cluster_coordinates.keys()):
 			tmp_dict = {}
 			for cluster_id in cluster_coordinates[gene]:
 				n_mutations = 0
@@ -145,7 +145,7 @@ class OncodriveClustAnalysis(object):
 		genes_sorted = sorted(cluster_coordinates.keys())
 		for gene in genes_sorted:
 			#---> (1) get the number of mutations of the gene
-			gene_muts = sum([accum_mut_pos[gene][pos] for pos in accum_mut_pos[gene].keys()])
+			gene_muts = sum([accum_mut_pos[gene][pos] for pos in list(accum_mut_pos[gene].keys())])
 			cluster_scores[gene] = self.get_cluster_score(gene, gene_muts,
 															   accum_mut_pos[gene],
 															   cluster_coordinates[gene])
@@ -248,7 +248,7 @@ class OncodriveClustAnalysis(object):
 	def calculate_max_limit_cluster(self, gene, gene_meaningful_cluster, cluster_id, pos, direction, cds_len):
 			if cluster_id == 1 and direction == 'left':
 				return 0
-			if cluster_id == len(gene_meaningful_cluster.keys()) and direction == 'right':
+			if cluster_id == len(list(gene_meaningful_cluster.keys())) and direction == 'right':
 				return int(cds_len[gene]) / 3 if gene in cds_len else pos
 			elif direction == 'left':
 				return pos - ((pos - gene_meaningful_cluster[cluster_id - 1][1]) / 2)
@@ -286,8 +286,8 @@ class OncodriveClustAnalysis(object):
 			limit_init = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster, cluster_id, init, 'left', cds_len)
 			limit_end = self.calculate_max_limit_cluster(gene, gene_meaningful_cluster, cluster_id, end, 'right', cds_len)
 
-			init = self.calculate_limit_cluster(gene, init, limit_init, gene_accum_mut_pos.keys(), intraclust_d, 'left')
-			end = self.calculate_limit_cluster(gene, end, limit_end, gene_accum_mut_pos.keys(), intraclust_d, 'right')
+			init = self.calculate_limit_cluster(gene, init, limit_init, list(gene_accum_mut_pos.keys()), intraclust_d, 'left')
+			end = self.calculate_limit_cluster(gene, end, limit_end, list(gene_accum_mut_pos.keys()), intraclust_d, 'right')
 
 			gene_extended_meaningful_cluster[cluster_id] = [init, end]
 

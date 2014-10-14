@@ -51,16 +51,20 @@ Either way, you should now be using your *virtualenv* (notice how the prompt of 
 Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your *virtualenv*:
 
 	(env) $ pip install -U distribute
-	(env) $ pip install -U numpy==1.6.1
-	(env) $ pip install -U scipy==0.9.0
-	(env) $ pip install -U pandas==0.10.1
-	(env) $ pip install -U statsmodels==0.4.3
+	(env) $ pip install -U numpy==1.9.0
+	(env) $ pip install -U scipy==0.14.0
+	(env) $ pip install -U pandas==0.14.1
+	(env) $ pip install -U statsmodels==0.6.0
+        ## if statsmodel 0.6.0 is still in development, install it like this:
+        (env) $ pip install git+https://github.com/statsmodels/statsmodels.git@master
 
 One problem that could arise is that scipy does not found the required libraries *BLAS* and *LAPACK* or *ATLAS*. In case they are not installed, you need to download and compile them by yourself. There is an installation guide at [http://www.scipy.org/Installing_SciPy](http://www.scipy.org/Installing_SciPy)
 
 Then to get OncodriveCLUST installed run the following command:
 
-	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/0.3.tar.gz
+	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
+        ## if you need to install for oncodriveCLUST in a python2 environment, please use this command:
+        (env) $ pip install git+https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz@96f31fcaa3dad
 
 And that's all. The following command will allow you to check that is correctly installed by showing the command help:
 

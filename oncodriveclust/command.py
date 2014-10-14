@@ -3,8 +3,8 @@ import argparse
 import logging
 
 from . import VERSION
-from analysis import OncodriveClustAnalysis
-from utils import *
+from .analysis import OncodriveClustAnalysis
+from .utils import *
 
 _LOG_LEVELS = {
 	"debug" : logging.DEBUG,
@@ -131,8 +131,8 @@ class OncodriveClustCommand(Command):
 			cgc_phen = cgc[gene] if gene in cgc else ''
 			prot_dom = dom[gene] if gene in dom else ''
 			gene_len = int(cds_len[gene]) / 3
-			gene_muts = sum([non_syn_accum_mut_pos[gene][pos] for pos in non_syn_accum_mut_pos[gene].keys()])
-			num_clusters = len(non_syn_cluster_coordinates[gene].keys())
+			gene_muts = sum([non_syn_accum_mut_pos[gene][pos] for pos in list(non_syn_accum_mut_pos[gene].keys())])
+			num_clusters = len(list(non_syn_cluster_coordinates[gene].keys()))
 
 			if num_clusters > 0:
 				muts_clusters = sum(non_syn_cluster_muts[gene].values())
