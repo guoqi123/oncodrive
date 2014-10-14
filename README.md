@@ -64,7 +64,7 @@ Then to get OncodriveCLUST installed run the following command:
 
 	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
         ## if you need to install for oncodriveCLUST in a python2 environment, please use this command:
-        (env) $ pip install git+git://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz@96f31fcaa3dad
+        (env) $ pip install git+https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz@96f31fcaa3dad
 
 And that's all. The following command will allow you to check that is correctly installed by showing the command help:
 
