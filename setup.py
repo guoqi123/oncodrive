@@ -41,7 +41,6 @@ setup(
 
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Intended Audience :: Bioinformatics",
         "Environment :: Console",
         "Intended Audience :: Science/Research",
         "Natural Language :: English",
