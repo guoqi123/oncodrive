@@ -210,11 +210,15 @@ class OncodriveClustAnalysis(object):
 		else:
 			scores_mean, scores_sd = calculate_mean_and_sd(scores)
 
+			#small bug detected by users
+			if scores_sd == 0:
+				scores_mean, scores_sd = self.get_default_background_values()
+				self.log.warn('There is no cluster observed among non silent mutations. Predefined background model constructed by using available cancer data projects will be used!')
+
 		#then, i compare each value with the overall distribution
 		for gene in gene_cluster_scores:
 			gene_cluster_scores_external_z[gene] = get_z(gene_cluster_scores[gene], scores_mean, scores_sd)
-		
-		
+				
 		return gene_cluster_scores_external_z
 
 	def get_significant_gene_positions(self, gene_accum_mut_pos, minimum_mut_per_position_threshold):
@@ -341,6 +345,7 @@ class OncodriveClustAnalysis(object):
 
 		non_syn_gene_cluster_scores = self.group_clusters_of_genes(non_syn_cluster_scores)
 		syn_gene_cluster_scores = self.group_clusters_of_genes(syn_cluster_scores)
+
 
 		# (C) Calculate the Z of the gene clustering score of non_syn vs syn (i.e. background model)
 		self.log.info("Comparing non synonymous mutations with the background model ...")
