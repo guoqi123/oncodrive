@@ -8,48 +8,47 @@ The method does not assume that the baseline mutation probability is homogeneous
 """
 
 from setuptools import setup, find_packages
-
 from oncodriveclust import VERSION, AUTHORS, CONTACT_EMAIL
 
 setup(
-	name = "oncodriveclust",
-	version = VERSION,
-	packages = find_packages(),
+    name="oncodriveclust",
+    version=VERSION,
+    packages=find_packages(),
 
-	install_requires = [
-		#"numpy==1.9.0",
-		#"scipy==0.14.0",
-		#"pandas==0.14.1",
-		#"statsmodels==0.6.0",
-	],
+    install_requires=[
+        "numpy>=1.9.0",
+        "scipy>=0.14.0",
+        "pandas>=0.14.1",
+        "statsmodels>=0.6.0",
+    ],
 
-	include_package_data = True,
+    include_package_data=True,
 
-	entry_points = {
-		'console_scripts': [
-			'oncodriveclust = oncodriveclust.command:main'
-		]
-	},
+    entry_points={
+        'console_scripts': [
+            'oncodriveclust = oncodriveclust.command:main'
+        ]
+    },
 
-	# metadata for upload to PyPI
-	author = AUTHORS,
-	author_email = CONTACT_EMAIL,
-	description = "OncodriveCLUST",
-	license = "UPF Free Source Code",
-	keywords = "",
-	url = "https://bitbucket.org/bbglab/oncodriveclust",
-	long_description = __doc__,
+    # metadata for upload to PyPI
+    author=AUTHORS,
+    author_email=CONTACT_EMAIL,
+    description="OncodriveCLUST",
+    license="UPF Free Source Code",
+    keywords="",
+    url="https://bitbucket.org/bbglab/oncodriveclust",
+    long_description=__doc__,
 
-	classifiers = [
-		"Development Status :: 4 - Beta",
-		"Intended Audience :: Bioinformatics",
-		"Environment :: Console",
-		"Intended Audience :: Science/Research",
-		"Natural Language :: English",
-		"Operating System :: OS Independent",
-		"Programming Language :: Python",
-		"Programming Language :: Python :: 2.7",
-		"Topic :: Scientific/Engineering",
-		"Topic :: Scientific/Engineering :: Bio-Informatics"
-	]
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Bioinformatics",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Bio-Informatics"
+    ]
 )
