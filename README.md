@@ -14,57 +14,13 @@ We have analysed those entries of the COSMIC database annotated as whole gene sc
 
 ## Installation ##
 
-OncodriveCLUST depends on some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/), [pandas](http://pandas.pydata.org/) and [statsmodels](http://statsmodels.sourceforge.net/).
+OncodriveCLUST depends on Python 3 and some external libraries, [numpy](http://www.numpy.org/), [scipy](http://www.scipy.org/), [pandas](http://pandas.pydata.org/) and [statsmodels](http://statsmodels.sourceforge.net/).
 
-Those libraries require to compile their code during the installation so it will take some time. But don't be scared, if you follow our instructions everything should be fine. Once they are installed it is very easy to get OncodriveCLUST ready to work.
-
-We recommend to use [virtualenv](http://www.virtualenv.org/). virtualenv is a tool to create isolated *Python* environments. The basic problem being addressed is one of dependencies and versions, and indirectly permissions. With *virtualenv* you can install the libraries and programs without having to be *root* and without conflicting with other program's libraries.
-
-If you are on *Mac OS X* or *Linux*, chances are that one of the following two commands will work for you:
-
-	$ sudo easy_install virtualenv
-
-or even better:
-
-	$ sudo pip install virtualenv
-
-One of these will probably install *virtualenv* on your system. Maybe it’s even in your package manager. If you use *Ubuntu*, try:
-
-	$ sudo apt-get install python-virtualenv
-
-If you are on *Windows* and don’t have the *easy_install* command, you must install it first. Check the *pip* and *distribute* on *Windows* section for more information about how to do that. Once you have it installed, run the same commands as above, but without the *sudo* prefix.
-
-Once you have *virtualenv* installed, just fire up a shell and create your own environment.
-
-	$ virtualenv env
-
-Now, whenever you want to work on a project, you only have to activate the corresponding environment. On *OS X* and *Linux*, do the following:
-
-	$ source env/bin/activate
-
-If you are a *Windows* user, the following command is for you:
-
-	$ env\scripts\activate
-
-Either way, you should now be using your *virtualenv* (notice how the prompt of your shell has changed to show the active environment).
-
-Now you can just enter the following commands to get the OncodriveCLUST dependencies installed in your *virtualenv*:
-
-	(env) $ pip install -U distribute
-	(env) $ pip install -U numpy==1.9.0
-	(env) $ pip install -U scipy==0.14.0
-	(env) $ pip install -U pandas==0.14.1
-	(env) $ pip install -U statsmodels==0.6.0
-        ## if statsmodel 0.6.0 is still in development, install it like this:
-        (env) $ pip install git+https://github.com/statsmodels/statsmodels.git@master
-
-One problem that could arise is that scipy does not found the required libraries *BLAS* and *LAPACK* or *ATLAS*. In case they are not installed, you need to download and compile them by yourself. There is an installation guide at [http://www.scipy.org/Installing_SciPy](http://www.scipy.org/Installing_SciPy)
+The easiest way to install all this software stack is using the well known [Anaconda Python distribution](http://continuum.io/downloads#py34).
 
 Then to get OncodriveCLUST installed run the following command:
 
-	(env) $ pip install https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz
-        ## if you need to install for oncodriveCLUST in a python2 environment, please use this command:
-        (env) $ pip install git+https://bitbucket.org/bbglab/oncodriveclust/get/master.tar.gz@96f31fcaa3dad
+	(env) $ pip install oncodriveclust
 
 And that's all. The following command will allow you to check that is correctly installed by showing the command help:
 
