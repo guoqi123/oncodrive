@@ -73,7 +73,7 @@ With the [source code](https://bitbucket.org/bbglab/oncodriveclust/get/0.3.tar.g
 (env) $ cd bbglab-oncodriveclust-<code>
 ```
 
-We also provide with more [examples in a separate compressed file](https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust-examples.tar.gz).
+We also provide with more [examples in a separate compressed file](https://bitbucket.org/bbglab/oncodriveclust/downloads/oncodriveclust_examples.tar.gz).
 
 To run the default example:
 
